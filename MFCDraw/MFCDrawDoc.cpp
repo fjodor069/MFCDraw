@@ -48,6 +48,12 @@ BEGIN_MESSAGE_MAP(CMFCDrawDoc, CDocument)
 	ON_COMMAND(ID_FORMAT_COLOR, &CMFCDrawDoc::OnFormatColor)
 	ON_COMMAND(ID_FORMAT_FONT, &CMFCDrawDoc::OnFormatFont)
 	ON_COMMAND(ID_FORMAT_FILL, &CMFCDrawDoc::OnFormatFill)
+	ON_UPDATE_COMMAND_UI(ID_ADD_LINE, &CMFCDrawDoc::OnUpdateAddLine)
+	ON_UPDATE_COMMAND_UI(ID_ADD_ARROW, &CMFCDrawDoc::OnUpdateAddArrow)
+	ON_UPDATE_COMMAND_UI(ID_ADD_RECTANGLE, &CMFCDrawDoc::OnUpdateAddRectangle)
+	ON_UPDATE_COMMAND_UI(ID_ADD_ELLIPSE, &CMFCDrawDoc::OnUpdateAddEllipse)
+	ON_UPDATE_COMMAND_UI(ID_ADD_TEXT, &CMFCDrawDoc::OnUpdateAddText)
+	ON_UPDATE_COMMAND_UI(ID_FORMAT_MODIFY, &CMFCDrawDoc::OnUpdateFormatModify)
 END_MESSAGE_MAP()
 
 
@@ -409,6 +415,7 @@ const HCURSOR CMFCDrawDoc::GetCursor() const
 void CMFCDrawDoc::OnAddLine()
 {
 	// TODO: Add your command handler code here
+	m_eNextActionState = ADD_LINE;
 }
 
 
@@ -488,4 +495,75 @@ void CMFCDrawDoc::OnFormatFill()
 	{
 		m_nextFillColor = colorDialog.GetColor();
 	}
+}
+
+
+void CMFCDrawDoc::OnUpdateAddLine(CCmdUI *pCmdUI)
+{
+	// TODO: Add your command update UI handler code here
+	pCmdUI->SetCheck(m_eNextActionState == ADD_LINE);
+}
+
+
+void CMFCDrawDoc::OnUpdateAddArrow(CCmdUI *pCmdUI)
+{
+	// TODO: Add your command update UI handler code here
+}
+
+
+void CMFCDrawDoc::OnUpdateAddRectangle(CCmdUI *pCmdUI)
+{
+	// TODO: Add your command update UI handler code here
+}
+
+
+void CMFCDrawDoc::OnUpdateAddEllipse(CCmdUI *pCmdUI)
+{
+	// TODO: Add your command update UI handler code here
+}
+
+
+void CMFCDrawDoc::OnUpdateAddText(CCmdUI *pCmdUI)
+{
+	// TODO: Add your command update UI handler code here
+}
+
+
+void CMFCDrawDoc::OnUpdateFormatModify(CCmdUI *pCmdUI)
+{
+	// TODO: Add your command update UI handler code here
+}
+
+
+BOOL CMFCDrawDoc::IsMarked(Figure* pFigure)
+{
+	return 0;
+}
+
+
+BOOL CMFCDrawDoc::IsMarkedText(Figure* pFigure)
+{
+	return 0;
+}
+
+
+BOOL CMFCDrawDoc::IsMarkedAndFilled(Figure* pFigure)
+{
+	return 0;
+}
+
+
+BOOL CMFCDrawDoc::IsMarkedAndNotFilled(Figure* pFigure)
+{
+	return 0;
+}
+
+
+void CMFCDrawDoc::UnmarkAllFigures()
+{
+}
+
+
+void CMFCDrawDoc::ClearCopyList()
+{
 }

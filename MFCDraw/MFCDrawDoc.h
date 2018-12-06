@@ -108,4 +108,18 @@ public:
 	afx_msg void OnFormatColor();
 	afx_msg void OnFormatFont();
 	afx_msg void OnFormatFill();
+	afx_msg void OnUpdateAddLine(CCmdUI *pCmdUI);
+	afx_msg void OnUpdateAddArrow(CCmdUI *pCmdUI);
+	afx_msg void OnUpdateAddRectangle(CCmdUI *pCmdUI);
+	afx_msg void OnUpdateAddEllipse(CCmdUI *pCmdUI);
+	afx_msg void OnUpdateAddText(CCmdUI *pCmdUI);
+	afx_msg void OnUpdateFormatModify(CCmdUI *pCmdUI);
+private:
+	static BOOL IsMarked(Figure* pFigure);
+	static BOOL IsMarkedText(Figure* pFigure);
+	static BOOL IsMarkedAndFilled(Figure* pFigure);
+	static BOOL IsMarkedAndNotFilled(Figure* pFigure);
+	void UnmarkAllFigures();
+	void ClearCopyList();
+
 };

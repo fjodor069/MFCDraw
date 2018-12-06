@@ -8,17 +8,20 @@
 
 
 LineFigure::LineFigure()
+	: Figure()
 {
 }
 
 LineFigure::LineFigure(const Utility::Color& color, const CPoint& ptMouse)
-	: m_ptFirst(ptMouse),
+	: Figure(color),
+	  m_ptFirst(ptMouse),
 	  m_ptLast(ptMouse)
 {
 }
 
 //copy constructor
 LineFigure::LineFigure(const LineFigure& line)
+	: Figure()
 {
 }
 
