@@ -16,8 +16,16 @@
 #include "MyList.h"
 
 
+
 #include "Figure.h"
+#include "TwoDimensionalFigure.h"
 #include "LineFigure.h"
+#include "ArrowFigure.h"
+#include "RectangleFigure.h"
+#include "EllipseFigure.h"
+
+#include "TextFigure.h"
+#include "FigureFileManager.h"
 
 
 #include "MFCDrawDoc.h"
@@ -78,7 +86,25 @@ void CMFCDrawView::OnDraw(CDC* pDC)
 	if (!pDoc)
 		return;
 
-	CPoint point = pDoc->m_ptPoint;
+	const FigurePointerList* pFigurePtrList = pDoc->GetFigurePtrList();
+
+	for (POSITION position = pFigurePtrList->GetHeadPosition();
+		position != NULL; pFigurePtrList->GetNext(position))
+	{
+		Figure* pFigure = pFigurePtrList->GetAt(position);
+		CRect rcFigure = pFigure->GetArea();
+		pFigure->Draw(pDC);
+	}
+	/*const RectangleFigure* pInsideRectangle = pDoc->GetInsideRectangle();
+	if (pInsideRectangle != NULL)
+	{
+		pInsideRectangle->Draw(pDC);
+	}
+*/
+
+
+
+	/*CPoint point = pDoc->m_ptPoint;
 
 	CPen pen(PS_SOLID, 0, pDoc->m_nextColor);
 	CBrush brush(pDoc->m_nextFillColor);
@@ -89,11 +115,14 @@ void CMFCDrawView::OnDraw(CDC* pDC)
 	pDC->Ellipse(point.x - 10, point.y - 10, point.x + 10, point.y + 10);
 
 	pDC->SelectObject(&pOldPen);
-	pDC->SelectObject(&pOldBrush);
+	pDC->SelectObject(&pOldBrush);*/
 
 	
 }
 
+// set the size of the view you can scroll
+// and the mapping mode
+//
 void CMFCDrawView::OnInitialUpdate()
 {
 	CScrollView::OnInitialUpdate();
@@ -151,12 +180,19 @@ CMFCDrawDoc* CMFCDrawView::GetDocument() const // non-debug version is inline
 void CMFCDrawView::OnLButtonDown(UINT nFlags, CPoint point)
 {
 	
+	CClientDC dc(this);
+	OnPrepareDC(&dc);
+
+	dc.DPtoLP(&point);
+
+
+	BOOL bControlKeyDown = (nFlags & MK_CONTROL);
+
 	CMFCDrawDoc* pDoc = GetDocument();
 	ASSERT_VALID(pDoc);
-	pDoc->MouseDown(point,true,nullptr);
+	pDoc->MouseDown(point,bControlKeyDown, &dc);
 
-	//
-	CScrollView::OnLButtonDown(nFlags, point);
+
 }
 
 
@@ -165,8 +201,6 @@ int CMFCDrawView::OnCreate(LPCREATESTRUCT lpCreateStruct)
 	if (CScrollView::OnCreate(lpCreateStruct) == -1)
 		return -1;
 
-	//== dit gaat niet , constructor is protected
-	//m_pDrawDoc = (CDrawDoc*) m_pDocument;
 
 	CSize szTotal(TOTAL_WIDTH, TOTAL_HEIGHT);
 	SetScrollSizes(MM_HIMETRIC, szTotal);
@@ -177,9 +211,15 @@ int CMFCDrawView::OnCreate(LPCREATESTRUCT lpCreateStruct)
 
 void CMFCDrawView::OnSetFocus(CWnd* pOldWnd)
 {
+
 	CScrollView::OnSetFocus(pOldWnd);
 
-	// TODO: Add your message handler code here
+	CMFCDrawDoc* pDoc = GetDocument();
+	ASSERT_VALID(pDoc);
+	Utility::Caret* pCaret = pDoc->GetCaret();
+	pCaret->OnSetFocus(this);
+	
+
 }
 
 
@@ -188,6 +228,12 @@ void CMFCDrawView::OnKillFocus(CWnd* pNewWnd)
 	CScrollView::OnKillFocus(pNewWnd);
 
 	// TODO: Add your message handler code here
+	CMFCDrawDoc* pDoc = GetDocument();
+	ASSERT_VALID(pDoc);
+
+	Utility::Caret* pCaret = pDoc->GetCaret();
+	pCaret->OnKillFocus();
+
 }
 
 
@@ -234,6 +280,55 @@ void CMFCDrawView::OnChar(UINT nChar, UINT nRepCnt, UINT nFlags)
 void CMFCDrawView::OnKeyDown(UINT nChar, UINT nRepCnt, UINT nFlags)
 {
 	// TODO: Add your message handler code here and/or call default
+	CClientDC dc(this);
+	OnPrepareDC(&dc);
 
-	CScrollView::OnKeyDown(nChar, nRepCnt, nFlags);
+	CMFCDrawDoc* pDoc = GetDocument();
+	ASSERT_VALID(pDoc);
+
+	switch (nChar)
+	{
+	case VK_HOME:
+		if (!pDoc->KeyDown(VK_HOME, &dc))
+		{
+			OnVScroll(SB_TOP, 0, NULL);
+			OnHScroll(SB_LEFT, 0, NULL);
+		}
+		break;
+		// ...
+	}
+
+
+}
+
+
+//
+// added with override
+// 
+void CMFCDrawView::OnUpdate(CView* /*pSender*/, LPARAM lHint, CObject* /*pHint*/)
+{
+	// TODO: Add your specialized code here and/or call the base class
+
+	if (lHint != NULL)
+	{
+		CRect rcClip = *(CRect*)lHint;
+		int cxMargin = (int)(0.05 * rcClip.Width());
+		int cyMargin = (int)(0.05 * rcClip.Height());
+		rcClip.left -= cxMargin;
+		rcClip.right += cxMargin;
+		rcClip.top -= cyMargin;
+		rcClip.bottom += cyMargin;
+		CClientDC dc(this);
+		OnPrepareDC(&dc);
+		dc.LPtoDP(rcClip);
+		InvalidateRect(rcClip);
+	}
+	else
+	{
+		Invalidate();
+	}
+	UpdateWindow();
+
+
+
 }

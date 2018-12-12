@@ -11,7 +11,7 @@ enum ApplicationState {	SINGLE_DRAG, MULTIPLE_DRAG, RECTANGLE_DRAG, EDIT_TEXT, I
 enum NextActionState { ADD_LINE, ADD_ARROW, ADD_RECTANGLE,ADD_ELLIPSE, ADD_TEXT, MODIFY_FIGURE };
 
 //in text figure.h :
-enum KeyboardState { KM_INSERT, KM_OVERWRITE };
+//enum KeyboardState { KM_INSERT, KM_OVERWRITE };
 
 //typedef MyList<Figure*>  FigurePointerList;
 
@@ -56,19 +56,19 @@ protected:
 #endif // SHARED_HANDLERS
 private:
 	Utility::Caret m_caret;
-	//Utility::Color m_nextColor;
-	Utility::Font m_nextFont;
+	
+	Utility::Font m_nextFont;				//the current font
 
-	ApplicationState m_eApplicationState;
-	NextActionState  m_eNextActionState;
+	ApplicationState m_eApplicationState;	//state of the application
+	NextActionState  m_eNextActionState;	//action state of the document
 	KeyboardState m_eKeyboardState;
 	Figure* m_pSingleFigure;
-	//TextFigure
-	//RectangleFigure
+	TextFigure* m_pEditText;
+	RectangleFigure* m_pDragRectangle;
 
 	FigurePointerList m_figurePtrList, m_copyPtrList;
 
-	CPoint m_ptPrevMouse;
+	CPoint m_ptPrevMouse;					//the previous mouse position
 
 public:
 	void MouseDown(CPoint ptMouse, BOOL bControlKeyDown, CDC* pDC);
@@ -78,19 +78,19 @@ public:
 	BOOL KeyDown(UINT cChar, CDC* pDC);
 	void CharDown(UINT cChar, CDC* pDC);
 
-	CPoint m_ptPoint;			//temp
-	Utility::Color m_nextColor;
-	Utility::Color m_nextFillColor;
+	Utility::Color m_nextColor;			//the current drawing color
+	Utility::Color m_nextFillColor;		//not used
+	BOOL m_bNextFill;					//is the figure to be filled 
 
 	const FigurePointerList* GetFigurePtrList() const
 	{
 		return &m_figurePtrList;
 	}
-	/*
+	
 	const RectangleFigure* GetInsideRectangle() const
 	{
 		return m_pDragRectangle;
-	}*/
+	}
 	Utility::Caret* GetCaret() { return &m_caret; }
 
 	const HCURSOR GetCursor() const;
@@ -122,4 +122,7 @@ private:
 	void UnmarkAllFigures();
 	void ClearCopyList();
 
+public:
+	afx_msg void OnEditDelete();
+	afx_msg void OnUpdateEditDelete(CCmdUI *pCmdUI);
 };

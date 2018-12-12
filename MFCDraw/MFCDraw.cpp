@@ -17,10 +17,17 @@
 #include "Font.h"
 #include "Caret.h"
 
-#include "Figure.h"
-#include "LineFigure.h"
 
+#include "Figure.h"
+#include "TwoDimensionalFigure.h"
+#include "LineFigure.h"
+#include "ArrowFigure.h"
+#include "RectangleFigure.h"
+#include "EllipseFigure.h"
+
+#include "TextFigure.h"
 //
+#include "FigureFileManager.h"
 
 #include "MFCDrawDoc.h"
 #include "MFCDrawView.h"
@@ -106,7 +113,7 @@ BOOL CMFCDrawApp::InitInstance()
 	// Change the registry key under which our settings are stored
 	// TODO: You should modify this string to be something appropriate
 	// such as the name of your company or organization
-	SetRegistryKey(_T("Local AppWizard-Generated Applications"));
+	SetRegistryKey(_T("Fjodor"));
 	LoadStdProfileSettings(4);  // Load standard INI file options (including MRU)
 
 

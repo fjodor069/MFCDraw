@@ -8,14 +8,16 @@
 
 
 LineFigure::LineFigure()
-	: Figure()
+	: Figure(Utility::Black, FALSE),
+	m_eDragMode(CREATE_LINE)
 {
 }
 
 LineFigure::LineFigure(const Utility::Color& color, const CPoint& ptMouse)
 	: Figure(color),
 	  m_ptFirst(ptMouse),
-	  m_ptLast(ptMouse)
+	  m_ptLast(ptMouse),
+	  m_eDragMode(CREATE_LINE)
 {
 }
 
@@ -23,6 +25,9 @@ LineFigure::LineFigure(const Utility::Color& color, const CPoint& ptMouse)
 LineFigure::LineFigure(const LineFigure& line)
 	: Figure()
 {
+	m_ptFirst = line.m_ptFirst;
+	m_ptLast = line.m_ptLast;
+	m_eDragMode = line.m_eDragMode;
 }
 
 Figure* LineFigure::Copy() const
@@ -154,10 +159,12 @@ void LineFigure::Move(const CSize & szDistance)
 void LineFigure::Draw(CDC * pDC) const
 {
 	CPen pen(PS_SOLID, 0, (COLORREF)GetColor());
+	//CPen pen(PS_SOLID, 0, Utility::Black);
 	CPen* pOldPen = pDC->SelectObject(&pen);
 	pDC->MoveTo(m_ptFirst.x, m_ptFirst.y);
 	pDC->LineTo(m_ptLast.x, m_ptLast.y);
 	pDC->SelectObject(pOldPen);
+
 	if (IsMarked())
 	{
 		CPen pen(PS_SOLID, 0, Utility::Black); 
@@ -177,7 +184,7 @@ void LineFigure::Draw(CDC * pDC) const
 		pDC->SelectObject(pOldPen);
 		pDC->SelectObject(pOldBrush);
 	}
-
+	
 
 }
 
