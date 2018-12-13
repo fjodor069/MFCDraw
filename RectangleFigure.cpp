@@ -9,11 +9,14 @@
 
 
 RectangleFigure::RectangleFigure()
-	: TwoDimensionalFigure()
+	: TwoDimensionalFigure(Utility::Black,FALSE),
+	  m_eDragMode(CREATE_RECTANGLE)
 {
 }
 
 RectangleFigure::RectangleFigure(const Utility::Color & color, const CPoint & ptTopLeft, BOOL bFilled)
+	: TwoDimensionalFigure(color,bFilled),
+	m_eDragMode(CREATE_RECTANGLE)
 {
 }
 
@@ -28,6 +31,9 @@ Figure * RectangleFigure::Copy() const
 
 void RectangleFigure::Serialize(CArchive & archive)
 {
+	TwoDimensionalFigure::Serialize(archive);
+	//
+
 }
 
 HCURSOR RectangleFigure::GetCursor() const
@@ -116,14 +122,59 @@ BOOL RectangleFigure::Inside(const CRect & rcInside) const
 
 void RectangleFigure::MoveOrModify(const CSize & szDistance)
 {
+	switch (m_eDragMode)
+	{
+	case CREATE_RECTANGLE:
+		m_ptTopLeft += szDistance;
+		break;
+	case MODIFY_TOPLEFT:
+		m_ptTopLeft += szDistance;
+		break;
+	case MODIFY_TOPRIGHT:
+		m_ptTopLeft += szDistance;
+		break;
+	case MODIFY_BOTTOMRIGHT:
+		m_ptBottomRight += szDistance;
+		break;
+	case MODIFY_BOTTOMLEFT:
+		m_ptBottomRight += szDistance;
+		break;
+	case MOVE_RECTANGLE:
+		Move(szDistance);
+		break;
+	}
 }
 
 void RectangleFigure::Move(const CSize & szDistance)
 {
+	m_ptTopLeft += szDistance;
+	m_ptBottomRight += szDistance; 
+	
 }
 
 void RectangleFigure::Draw(CDC * pDC) const
 {
+	
+
+	if (IsFilled())
+	{
+		//fillrectangle
+	}
+	else
+	{
+		//drawrectangle
+		CPen pen(PS_SOLID, 0, (COLORREF)GetColor());
+		
+		CPen* pOldPen = pDC->SelectObject(&pen);
+		pDC->Rectangle(m_ptTopLeft.x, m_ptTopLeft.y, m_ptBottomRight.x, m_ptBottomRight.y);
+		pDC->SelectObject(pOldPen);
+	}
+	if (IsMarked())
+	{
+
+	}
+
+
 }
 
 CRect RectangleFigure::GetArea() const

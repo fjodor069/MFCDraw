@@ -54,7 +54,8 @@ public:
 	afx_msg void OnKeyDown(UINT nChar, UINT nRepCnt, UINT nFlags);
 
 private:
-	//CMFCDrawDoc m_pDrawDoc;
+	
+	virtual void OnUpdate(CView* /*pSender*/, LPARAM lHint, CObject* /*pHint*/);
 };
 
 #ifndef _DEBUG  // debug version in MFCDrawView.cpp

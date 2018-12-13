@@ -11,6 +11,7 @@
 
 
 //list of includes 
+#include "../../Utility/check.h"
 
 #include "Caret.h"
 #include "Color.h"
@@ -18,9 +19,15 @@
 #include "MyList.h"
 
 #include "Figure.h"
+#include "TwoDimensionalFigure.h"
 #include "LineFigure.h"
+#include "ArrowFigure.h"
+#include "RectangleFigure.h"
+#include "EllipseFigure.h"
 
+#include "TextFigure.h"
 
+#include "FigureFileManager.h"
 //
 
 #include "MFCDrawDoc.h"
@@ -54,6 +61,8 @@ BEGIN_MESSAGE_MAP(CMFCDrawDoc, CDocument)
 	ON_UPDATE_COMMAND_UI(ID_ADD_ELLIPSE, &CMFCDrawDoc::OnUpdateAddEllipse)
 	ON_UPDATE_COMMAND_UI(ID_ADD_TEXT, &CMFCDrawDoc::OnUpdateAddText)
 	ON_UPDATE_COMMAND_UI(ID_FORMAT_MODIFY, &CMFCDrawDoc::OnUpdateFormatModify)
+	ON_COMMAND(ID_EDIT_DELETE, &CMFCDrawDoc::OnEditDelete)
+	ON_UPDATE_COMMAND_UI(ID_EDIT_DELETE, &CMFCDrawDoc::OnUpdateEditDelete)
 END_MESSAGE_MAP()
 
 
@@ -61,13 +70,26 @@ END_MESSAGE_MAP()
 
 CMFCDrawDoc::CMFCDrawDoc()
 {
-	// TODO: add one-time construction code here
-	
+	//retrieve action state (drawing mode) from registry when initializing
+	m_eNextActionState = (NextActionState)AfxGetApp()->	GetProfileInt(TEXT("MFCDraw"), TEXT("ActionMode"), MODIFY_FIGURE);
+	m_eApplicationState = IDLE;
+	//retrieve color and fill
+	m_nextColor = (COLORREF)AfxGetApp()->GetProfileInt (TEXT("MFCDraw"), TEXT("CurrentColor"), Utility::Black);
+	m_bNextFill = (BOOL)AfxGetApp()->GetProfileInt	(TEXT("MFCDraw"), TEXT("CurrentFill"), TRUE);
+
+
 
 }
 
 CMFCDrawDoc::~CMFCDrawDoc()
 {
+	//save action state state to registry on shutdown
+	AfxGetApp()->WriteProfileInt(TEXT("MFCDraw"), TEXT("ActionMode"), (int)m_eNextActionState);
+	// write color and fill
+	AfxGetApp()->WriteProfileInt(TEXT("MFCDraw"), TEXT("CurrentColor"), (Utility::Color) m_nextColor);
+	AfxGetApp()->WriteProfileInt(TEXT("MFCDraw"), TEXT("CurrentFill"), (BOOL) m_bNextFill);
+
+
 }
 
 BOOL CMFCDrawDoc::OnNewDocument()
@@ -85,26 +107,43 @@ BOOL CMFCDrawDoc::OnNewDocument()
 
 
 // CMFCDrawDoc serialization
-
+// loads and stores the figures in the m_figurePtr list
+// we cannot serialize the list itself because it contains pointers, not objects
+// the list is iterated and stored one by one
+// the figurefilemanager helps storing the class type of the object
 void CMFCDrawDoc::Serialize(CArchive& ar)
 {
 	CDocument::Serialize(ar);
+
 	if (ar.IsStoring())
 	{
 
-		/*archive << (int)m_figurePtrList.GetSize();
+		ar << (int)m_figurePtrList.GetSize();
 		for (POSITION position = m_figurePtrList.GetHeadPosition();
 			position != NULL; m_figurePtrList.GetNext(position))
 		{
 			Figure* pFigure = m_figurePtrList.GetAt(position);
 			FigureFileManager manager(pFigure);
-			manager.Serialize(archive);
-			pFigure->Serialize(archive);
-		}*/
+			manager.Serialize(ar);
+			pFigure->Serialize(ar);
+		}
 	}
 	else
 	{
-		// TODO: add loading code here
+		int iSize;
+		ar >> iSize;
+		for (int iIndex = 0; iIndex < iSize; ++iIndex)
+		{
+			FigureFileManager manager;
+			manager.Serialize(ar);
+			Figure* pFigure = manager.GetFigure();
+			pFigure->Serialize(ar);
+			m_figurePtrList.AddTail(pFigure);
+		}
+
+
+
+
 	}
 }
 
@@ -179,109 +218,119 @@ void CMFCDrawDoc::Dump(CDumpContext& dc) const
 
 // CMFCDrawDoc commands
 
-// the heart of the application...
+// the heart of the application...mousedown and mouseup
 // handle objects when mouse button is pressed..
 //
 void CMFCDrawDoc::MouseDown(CPoint ptMouse, BOOL bControlKeyDown, CDC * pDC)
 {
-	//save the current position
+	//save the current mouse position
 	m_ptPrevMouse = ptMouse;
 
+	//if editing text, close it with simulating return
 	if (m_eApplicationState == EDIT_TEXT)
 		KeyDown(VK_RETURN, pDC);
-
-	//.....just some code for testing...
-
-	//MyList<Figure*>  ObjectList;
-
-
-	m_ptPoint = ptMouse;
-	UpdateAllViews(NULL);
-
-
-	//....just some code for testing..
-
+		
+	//depending on a menu choice.. one of these actions is taken
 	switch (m_eNextActionState)
 	{
-	case ADD_LINE:
-		check_memory(m_pSingleFigure = new LineFigure(m_nextColor, ptMouse));
-		m_figurePtrList.AddTail(m_pSingleFigure);
-		m_eApplicationState = SINGLE_DRAG;
-		SetModifiedFlag();
+		//if new figure is to be added...at the current mouse position.
+		case ADD_LINE:
+			check_memory(m_pSingleFigure = new LineFigure(m_nextColor, ptMouse));
+			m_figurePtrList.AddTail(m_pSingleFigure);
+			m_eApplicationState = SINGLE_DRAG;
+			SetModifiedFlag();
+			break;
+
+		case ADD_ARROW:
+			check_memory(m_pSingleFigure = new ArrowFigure(m_nextColor, ptMouse));
+			m_figurePtrList.AddTail(m_pSingleFigure);
+			m_eApplicationState = SINGLE_DRAG;
+			SetModifiedFlag();
+			break;
+
+		case ADD_RECTANGLE:
+			check_memory(m_pSingleFigure = new RectangleFigure(m_nextColor, ptMouse,m_bNextFill));
+			m_figurePtrList.AddTail(m_pSingleFigure);
+			m_eApplicationState = SINGLE_DRAG;
+			SetModifiedFlag();
+			break;
+
+		case ADD_ELLIPSE:
+			check_memory(m_pSingleFigure = new EllipseFigure(m_nextColor, ptMouse,m_bNextFill));
+			m_figurePtrList.AddTail(m_pSingleFigure);
+			m_eApplicationState = SINGLE_DRAG;
+			SetModifiedFlag();
+			break;
+
+		//keep adding text until return or escape is pressed
+		case ADD_TEXT:
+		{
+			check_memory(m_pEditText = new TextFigure(m_nextColor, ptMouse, m_nextFont, pDC));
+			m_figurePtrList.AddTail(m_pEditText);
+			m_eApplicationState = EDIT_TEXT;
+			CRect rcCaret = m_pEditText->GetCaretArea(m_eKeyboardState);
+			m_caret.SetAndShowCaret(rcCaret);
+			SetModifiedFlag();
+		}
 		break;
 
-	case ADD_ARROW:
-		// ...
-		break;
+		case MODIFY_FIGURE:
+			if (!bControlKeyDown)
+			{
+				UnmarkAllFigures();
+			}
+			Figure* pClickedFigure = NULL;
+			for (POSITION position = m_figurePtrList.GetTailPosition();
+				 position != NULL; m_figurePtrList.GetPrev(position))
+			{
+				Figure* pFigure = m_figurePtrList.GetAt(position);
+				if (pFigure->Click(ptMouse))
+				{
+					pClickedFigure = pFigure;
+					break;
+				}
+			}
+			if (pClickedFigure != NULL)
+			{
+				CRect rcOldFigure = pClickedFigure->GetArea();
+				if (bControlKeyDown)
 
-	case ADD_TEXT:
-	{
-		//check_memory(m_pEditText = new TextFigure(m_nextColor, ptMouse, m_nextFont, pDC));
-		//m_figurePtrList.AddTail(m_pEditText);
-		/*m_eApplicationState = EDIT_TEXT;
-		CRect rcCaret = m_pEditText->GetCaretArea
-		(m_eKeyboardState);
-		m_caret.SetAndShowCaret(rcCaret);
-		SetModifiedFlag();*/
-	}
-	break;
-	case MODIFY_FIGURE:
-		//if (!bControlKeyDown)
-		//{
-		//	//UnmarkAllFigures();
-		//}
-		//Figure* pClickedFigure = NULL;
-		//for (POSITION position = m_figurePtrList.GetTailPosition();
-		//	//position != NULL; m_figurePtrList.GetPrev(position))
-		//{
-		//	Figure* pFigure = m_figurePtrList.GetAt(position);
-		//	if (pFigure->Click(ptMouse))
-		//	{
-		//		pClickedFigure = pFigure;
-		//		break;
-		//	}
-		//}
-		//if (pClickedFigure != NULL)
-		//{
-		//	CRect rcOldFigure = pClickedFigure->GetArea();
-		//	if (bControlKeyDown)
-
-		//	{
-		//		if (pClickedFigure->IsMarked())
-		//		{
-		//			pClickedFigure->Mark(FALSE);
-		//			m_eApplicationState = IDLE;
-		//		}
-		//		else
-		//		{
-		//			pClickedFigure->Mark(TRUE);
-		//			m_figurePtrList.Remove(pClickedFigure);
-		//			m_figurePtrList.AddTail(pClickedFigure);
-		//			m_eApplicationState = MULTIPLE_DRAG;
-		//			SetModifiedFlag();
-		//		}
-		//	}
-		//	else
-		//	{
-		//		m_pSingleFigure = pClickedFigure;
-		//		m_pSingleFigure->Mark(TRUE);
-		//		m_figurePtrList.Remove(m_pSingleFigure);
-		//		m_figurePtrList.AddTail(m_pSingleFigure);
-		//		CRect rcFigure = m_pSingleFigure->GetArea();
-		//		UpdateAllViews(NULL, (LPARAM)&rcFigure);
-		//		m_eApplicationState = SINGLE_DRAG;
-		//		SetModifiedFlag();
-		//	}
-		//	CRect rcNewFigure = pClickedFigure->GetArea();
-		//	UpdateAllViews(NULL, (LPARAM)&rcOldFigure);
-		//	UpdateAllViews(NULL, (LPARAM)&rcNewFigure);
-		//}
-		//else
-		//{
-		//	check_memory(m_pDragRectangle = new RectangleFigure(GRAY, ptMouse, FALSE));
-		//	m_eApplicationState = RECTANGLE_DRAG;
-		//}
-		break;
+				{
+					if (pClickedFigure->IsMarked())
+					{
+						pClickedFigure->Mark(FALSE);
+						m_eApplicationState = IDLE;
+					}
+					else
+					{
+						pClickedFigure->Mark(TRUE);
+						m_figurePtrList.Remove(pClickedFigure);
+						m_figurePtrList.AddTail(pClickedFigure);
+						m_eApplicationState = MULTIPLE_DRAG;
+						SetModifiedFlag();
+					}
+				}
+				else
+				{
+					m_pSingleFigure = pClickedFigure;
+					m_pSingleFigure->Mark(TRUE);
+					m_figurePtrList.Remove(m_pSingleFigure);
+					m_figurePtrList.AddTail(m_pSingleFigure);
+					CRect rcFigure = m_pSingleFigure->GetArea();
+					UpdateAllViews(NULL, (LPARAM)&rcFigure);
+					m_eApplicationState = SINGLE_DRAG;
+					SetModifiedFlag();
+				}
+				CRect rcNewFigure = pClickedFigure->GetArea();
+				UpdateAllViews(NULL, (LPARAM)&rcOldFigure);
+				UpdateAllViews(NULL, (LPARAM)&rcNewFigure);
+			}
+			else
+			{
+				check_memory(m_pDragRectangle = new RectangleFigure(Utility::Gray, ptMouse, FALSE));
+				m_eApplicationState = RECTANGLE_DRAG;
+			}
+			break;
 
 	}//end switch
 
@@ -299,48 +348,48 @@ void CMFCDrawDoc::MouseDrag(const CPoint & ptMouse)
 
 	switch (m_eApplicationState)
 	{
-	case SINGLE_DRAG:
-	{
-		CRect rcOldFigure = m_pSingleFigure->GetArea();
-		m_pSingleFigure->MoveOrModify(szDistance);
-		CRect rcNewFigure = m_pSingleFigure->GetArea();
-		UpdateAllViews(NULL, (LPARAM)&rcOldFigure);
-		UpdateAllViews(NULL, (LPARAM)&rcNewFigure);
-	}
-	break;
-
-	case MULTIPLE_DRAG:
-	{
-		for (POSITION position = m_figurePtrList.GetHeadPosition(); position != NULL;
-			m_figurePtrList.GetNext(position))
+		case SINGLE_DRAG:
 		{
-			Figure* pFigure = m_figurePtrList.GetAt(position);
-			if (pFigure->IsMarked())
+			CRect rcOldFigure = m_pSingleFigure->GetArea();
+			m_pSingleFigure->MoveOrModify(szDistance);
+			CRect rcNewFigure = m_pSingleFigure->GetArea();
+			UpdateAllViews(NULL, (LPARAM)&rcOldFigure);
+			UpdateAllViews(NULL, (LPARAM)&rcNewFigure);
+		}
+		break;
+
+		case MULTIPLE_DRAG:
+		{
+			for (POSITION position = m_figurePtrList.GetHeadPosition(); position != NULL;
+				m_figurePtrList.GetNext(position))
 			{
-				CRect rcOldFigure = pFigure->GetArea();
-				pFigure->Move(szDistance);
-				CRect rcNewFigure = pFigure->GetArea();
-				UpdateAllViews(NULL, (LPARAM)&rcOldFigure);
-				UpdateAllViews(NULL, (LPARAM)&rcNewFigure);
+				Figure* pFigure = m_figurePtrList.GetAt(position);
+				if (pFigure->IsMarked())
+				{
+					CRect rcOldFigure = pFigure->GetArea();
+					pFigure->Move(szDistance);
+					CRect rcNewFigure = pFigure->GetArea();
+					UpdateAllViews(NULL, (LPARAM)&rcOldFigure);
+					UpdateAllViews(NULL, (LPARAM)&rcNewFigure);
+				}
 			}
 		}
-	}
-	break;
-
-	case RECTANGLE_DRAG:
-	{
-		/*CRect rcOldInside = m_pDragRectangle->GetArea();
-		m_pDragRectangle->MoveOrModify(szDistance);
-		CRect rcNewInside = m_pDragRectangle->GetArea();
-		UpdateAllViews(NULL, (LPARAM)&rcOldInside);
-		UpdateAllViews(NULL, (LPARAM)&rcNewInside);*/
-	}
-	break;
-
-
-	case EDIT_TEXT:
-	case IDLE:
 		break;
+
+		case RECTANGLE_DRAG:
+		{
+			CRect rcOldInside = m_pDragRectangle->GetArea();
+			m_pDragRectangle->MoveOrModify(szDistance);
+			CRect rcNewInside = m_pDragRectangle->GetArea();
+			UpdateAllViews(NULL, (LPARAM)&rcOldInside);
+			UpdateAllViews(NULL, (LPARAM)&rcNewInside);
+		}
+		break;
+
+
+		case EDIT_TEXT:
+		case IDLE:
+			break;
 
 	}//end switch
 
@@ -348,15 +397,19 @@ void CMFCDrawDoc::MouseDrag(const CPoint & ptMouse)
 }
 
 
-// do something if in the rectangle drag state
+//mouse button is released
+// only do something if in the rectangle drag state
 void CMFCDrawDoc::MouseUp()
 {
+	POSITION position;
+	CRect rcArea;
+
 	switch (m_eApplicationState)
 	{
 		case RECTANGLE_DRAG:
-			/*CRect rcArea = m_pDragRectangle->GetArea();
+			rcArea = m_pDragRectangle->GetArea();
 			rcArea.NormalizeRect();
-			POSITION position = m_figurePtrList.GetTailPosition();
+			position = m_figurePtrList.GetTailPosition();
 
 			while (position != NULL)
 			{
@@ -371,7 +424,7 @@ void CMFCDrawDoc::MouseUp()
 			delete m_pDragRectangle;
 			m_pDragRectangle = NULL;
 			UpdateAllViews(NULL, (LPARAM)&rcArea);
-			m_eApplicationState = IDLE;*/
+			m_eApplicationState = IDLE;
 			break;
 
 		case SINGLE_DRAG:
@@ -390,74 +443,197 @@ void CMFCDrawDoc::MouseUp()
 
 void CMFCDrawDoc::DoubleClick(CPoint ptMouse)
 {
+
+	switch (m_eNextActionState)
+	{
+		//...
+	case MODIFY_FIGURE:
+		UnmarkAllFigures();
+		m_eApplicationState = IDLE;
+		CRect rcOldArea;
+		Figure* pClickedFigure = NULL;
+		for (POSITION position = m_figurePtrList.
+			GetTailPosition(); position != NULL;
+			m_figurePtrList.GetPrev(position))
+		{
+			Figure* pFigure = m_figurePtrList.GetAt(position);
+			rcOldArea = pFigure->GetArea();
+			if (pFigure->DoubleClick(ptMouse))
+			{
+				pClickedFigure = pFigure;
+				break;
+			}
+		}//end for
+
+		if (pClickedFigure != NULL)
+		{
+			m_figurePtrList.Remove(pClickedFigure);
+			m_figurePtrList.AddTail(pClickedFigure);
+			m_pEditText = dynamic_cast<TextFigure*>	(pClickedFigure);
+			if (m_pEditText != NULL)
+			{
+				CRect rcCaret = m_pEditText->GetCaretArea(m_eKeyboardState);
+				m_caret.SetAndShowCaret(rcCaret);
+				m_eApplicationState = EDIT_TEXT;
+			}
+			else
+			{
+				CRect rcNewArea = pClickedFigure->GetArea();
+				UpdateAllViews(NULL, (LPARAM)&rcOldArea);
+				UpdateAllViews(NULL, (LPARAM)&rcNewArea);
+			}
+		}
+		break;
+	}//end switch
 }
 
-
+//
+// WM_KEYDOWN is sent for every key, including Insert, Del, Home, End
+//
 BOOL CMFCDrawDoc::KeyDown(UINT cChar, CDC* pDC)
 {
+	// ...
+	int iMarked = m_figurePtrList.CountIf(IsMarked);
+	if ((cChar == VK_DELETE) && (iMarked > 0))
+	{
+		OnEditDelete();
+		return TRUE;
+	}
+	return FALSE;
+
+
+
 	return 0;
 }
 
+//in addition to KeyDown, for a writeable key a WM_CHAR message is sent
+
 void CMFCDrawDoc::CharDown(UINT cChar, CDC * pDC)
 {
+	if ((m_eApplicationState == EDIT_TEXT) && isprint(cChar))
+	{
+		m_pEditText->CharDown(cChar, pDC, m_eKeyboardState);
+		CRect rcText = m_pEditText->GetArea();
+		UpdateAllViews(NULL, (LPARAM)&rcText);
+		CRect rcCaret = m_pEditText->GetCaretArea
+		(m_eKeyboardState);
+		m_caret.SetAndShowCaret(rcCaret);
+		SetModifiedFlag();
+	}
+
+
+
 }
 
 const HCURSOR CMFCDrawDoc::GetCursor() const
 {
-	return HCURSOR();
+	switch (m_eApplicationState)
+	{
+	case SINGLE_DRAG:
+		return m_pSingleFigure->GetCursor();
+	case MULTIPLE_DRAG:
+		return AfxGetApp()->LoadStandardCursor(IDC_SIZEALL);
+	case RECTANGLE_DRAG:
+		return AfxGetApp()->LoadStandardCursor(IDC_CROSS);
+	case EDIT_TEXT:
+		return AfxGetApp()->LoadStandardCursor(IDC_IBEAM);
+	case IDLE:
+		return AfxGetApp()->LoadStandardCursor(IDC_ARROW);
+	}
+	check(FALSE);
+
+	return NULL;
 }
-
-
 
 
 
 
 void CMFCDrawDoc::OnAddLine()
 {
-	// TODO: Add your command handler code here
+	UnmarkAllFigures();
 	m_eNextActionState = ADD_LINE;
 }
 
 
 void CMFCDrawDoc::OnAddArrow()
 {
-	// TODO: Add your command handler code here
+	UnmarkAllFigures();
+	m_eNextActionState = ADD_ARROW;
 }
 
 
 void CMFCDrawDoc::OnAddRectangle()
 {
-	// TODO: Add your command handler code here
+	UnmarkAllFigures();
+	m_eNextActionState = ADD_RECTANGLE;
 }
 
 
 void CMFCDrawDoc::OnAddEllipse()
 {
-	// TODO: Add your command handler code here
+	UnmarkAllFigures();
+	m_eNextActionState = ADD_ELLIPSE;
 }
 
 
 void CMFCDrawDoc::OnAddText()
 {
+	UnmarkAllFigures();
+	m_eNextActionState = ADD_TEXT;
+}
+
+
+void CMFCDrawDoc::OnEditDelete()
+{
 	// TODO: Add your command handler code here
 }
 
 
+
 void CMFCDrawDoc::OnEditCut()
 {
-	// TODO: Add your command handler code here
+	OnEditCopy();
+	OnEditDelete();
+
 }
 
 
 void CMFCDrawDoc::OnEditCopy()
 {
-	// TODO: Add your command handler code here
+	ClearCopyList();
+	for (POSITION position = m_figurePtrList.GetHeadPosition();
+		position != NULL; m_figurePtrList.GetNext(position))
+	{
+		Figure* pFigure = m_figurePtrList.GetAt(position);
+		if (pFigure->IsMarked())
+		{
+			Figure* pCopiedFigure = pFigure->Copy();
+			m_copyPtrList.AddTail(pCopiedFigure);
+		}
+	}
+
+
+
 }
 
 
 void CMFCDrawDoc::OnEditPaste()
 {
-	// TODO: Add your command handler code here
+
+	CSize szDistance(1000, -1000);
+	for (POSITION position = m_copyPtrList.GetHeadPosition();
+		position != NULL; m_copyPtrList.GetNext(position))
+	{
+		Figure* pCopiedFigure = m_copyPtrList.GetAt(position);
+		pCopiedFigure->Move(szDistance);
+		Figure* pPastedFigure = pCopiedFigure->Copy();
+		m_figurePtrList.AddTail(pPastedFigure);
+		CRect rcFigure = pPastedFigure->GetArea();
+		UpdateAllViews(NULL, (LPARAM)&rcFigure);
+	}
+	SetModifiedFlag();
+
+
 }
 
 
@@ -500,44 +676,68 @@ void CMFCDrawDoc::OnFormatFill()
 
 void CMFCDrawDoc::OnUpdateAddLine(CCmdUI *pCmdUI)
 {
-	// TODO: Add your command update UI handler code here
-	pCmdUI->SetCheck(m_eNextActionState == ADD_LINE);
+	pCmdUI->Enable(m_eApplicationState == IDLE);
+	pCmdUI->SetRadio(m_eNextActionState == ADD_LINE);
+	//pCmdUI->SetCheck(m_eNextActionState == ADD_LINE);
 }
 
 
 void CMFCDrawDoc::OnUpdateAddArrow(CCmdUI *pCmdUI)
 {
 	// TODO: Add your command update UI handler code here
+	pCmdUI->Enable(m_eApplicationState == IDLE);
+	pCmdUI->SetRadio(m_eNextActionState == ADD_ARROW);
 }
 
 
 void CMFCDrawDoc::OnUpdateAddRectangle(CCmdUI *pCmdUI)
 {
 	// TODO: Add your command update UI handler code here
+	pCmdUI->Enable(m_eApplicationState == IDLE);
+	pCmdUI->SetRadio(m_eNextActionState == ADD_RECTANGLE);
 }
 
 
 void CMFCDrawDoc::OnUpdateAddEllipse(CCmdUI *pCmdUI)
 {
 	// TODO: Add your command update UI handler code here
+	pCmdUI->Enable(m_eApplicationState == IDLE);
+	pCmdUI->SetRadio(m_eNextActionState == ADD_ELLIPSE);
 }
 
 
 void CMFCDrawDoc::OnUpdateAddText(CCmdUI *pCmdUI)
 {
 	// TODO: Add your command update UI handler code here
+	pCmdUI->Enable(m_eApplicationState == IDLE);
+	pCmdUI->SetRadio(m_eNextActionState == ADD_TEXT);
 }
 
 
 void CMFCDrawDoc::OnUpdateFormatModify(CCmdUI *pCmdUI)
 {
 	// TODO: Add your command update UI handler code here
+	pCmdUI->Enable(m_eApplicationState == IDLE);
+	pCmdUI->SetRadio(m_eNextActionState == MODIFY_FIGURE);
 }
+
+
+
+
+
+
+void CMFCDrawDoc::OnUpdateEditDelete(CCmdUI *pCmdUI)
+{
+	// TODO: Add your command update UI handler code here
+}
+
 
 
 BOOL CMFCDrawDoc::IsMarked(Figure* pFigure)
 {
-	return 0;
+	return pFigure->IsMarked();
+
+
 }
 
 
@@ -567,3 +767,4 @@ void CMFCDrawDoc::UnmarkAllFigures()
 void CMFCDrawDoc::ClearCopyList()
 {
 }
+
