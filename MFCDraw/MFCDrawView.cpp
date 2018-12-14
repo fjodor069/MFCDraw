@@ -95,27 +95,18 @@ void CMFCDrawView::OnDraw(CDC* pDC)
 		CRect rcFigure = pFigure->GetArea();
 		pFigure->Draw(pDC);
 	}
+
+
 	/*const RectangleFigure* pInsideRectangle = pDoc->GetInsideRectangle();
 	if (pInsideRectangle != NULL)
 	{
 		pInsideRectangle->Draw(pDC);
 	}
+
 */
 
 
-
-	/*CPoint point = pDoc->m_ptPoint;
-
-	CPen pen(PS_SOLID, 0, pDoc->m_nextColor);
-	CBrush brush(pDoc->m_nextFillColor);
-
-	CPen* pOldPen = pDC->SelectObject(&pen);
-	CBrush* pOldBrush = pDC->SelectObject(&brush);
-
-	pDC->Ellipse(point.x - 10, point.y - 10, point.x + 10, point.y + 10);
-
-	pDC->SelectObject(&pOldPen);
-	pDC->SelectObject(&pOldBrush);*/
+	
 
 	
 }
@@ -195,7 +186,9 @@ void CMFCDrawView::OnLButtonDown(UINT nFlags, CPoint point)
 
 }
 
-
+//
+// called after creation but before it is shown
+//
 int CMFCDrawView::OnCreate(LPCREATESTRUCT lpCreateStruct)
 {
 	if (CScrollView::OnCreate(lpCreateStruct) == -1)
@@ -247,25 +240,29 @@ BOOL CMFCDrawView::OnSetCursor(CWnd* pWnd, UINT nHitTest, UINT message)
 
 void CMFCDrawView::OnMouseMove(UINT nFlags, CPoint point)
 {
-	// TODO: Add your message handler code here and/or call default
-
-	CScrollView::OnMouseMove(nFlags, point);
+	CMFCDrawDoc* pDoc = GetDocument();
+	ASSERT_VALID(pDoc);
+	pDoc->MouseDrag(point);
 }
 
 
 void CMFCDrawView::OnLButtonUp(UINT nFlags, CPoint point)
 {
-	// TODO: Add your message handler code here and/or call default
+	CMFCDrawDoc* pDoc = GetDocument();
+	ASSERT_VALID(pDoc);
+	pDoc->MouseUp();
 
-	CScrollView::OnLButtonUp(nFlags, point);
+	//CScrollView::OnLButtonUp(nFlags, point);
 }
 
 
 void CMFCDrawView::OnLButtonDblClk(UINT nFlags, CPoint point)
 {
-	// TODO: Add your message handler code here and/or call default
+	CMFCDrawDoc* pDoc = GetDocument();
+	ASSERT_VALID(pDoc);
+	pDoc->DoubleClick(point);
 
-	CScrollView::OnLButtonDblClk(nFlags, point);
+	//CScrollView::OnLButtonDblClk(nFlags, point);
 }
 
 
@@ -277,9 +274,13 @@ void CMFCDrawView::OnChar(UINT nChar, UINT nRepCnt, UINT nFlags)
 }
 
 
+
+// process all keys
+// first send it to the document class,
+// if not used there, returns false and use for scrolling the view
+//
 void CMFCDrawView::OnKeyDown(UINT nChar, UINT nRepCnt, UINT nFlags)
 {
-	// TODO: Add your message handler code here and/or call default
 	CClientDC dc(this);
 	OnPrepareDC(&dc);
 
@@ -288,14 +289,28 @@ void CMFCDrawView::OnKeyDown(UINT nChar, UINT nRepCnt, UINT nFlags)
 
 	switch (nChar)
 	{
-	case VK_HOME:
-		if (!pDoc->KeyDown(VK_HOME, &dc))
-		{
-			OnVScroll(SB_TOP, 0, NULL);
-			OnHScroll(SB_LEFT, 0, NULL);
-		}
-		break;
-		// ...
+		case VK_HOME:
+			if (!pDoc->KeyDown(VK_HOME, &dc))
+			{
+				OnVScroll(SB_TOP, 0, NULL);
+				OnHScroll(SB_LEFT, 0, NULL);
+			}
+			break;
+			// ...
+
+			
+		case VK_END:
+			if (!pDoc->KeyDown(VK_HOME, &dc))
+			{
+				OnVScroll(SB_TOP, 0, NULL);
+				OnHScroll(SB_LEFT, 0, NULL);
+			}
+			break;
+
+
+
+
+
 	}
 
 

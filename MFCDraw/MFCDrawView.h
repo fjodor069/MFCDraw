@@ -55,7 +55,7 @@ public:
 
 private:
 	
-	virtual void OnUpdate(CView* /*pSender*/, LPARAM lHint, CObject* /*pHint*/);
+	virtual void OnUpdate(CView* pSender, LPARAM lHint, CObject* pHint);
 };
 
 #ifndef _DEBUG  // debug version in MFCDrawView.cpp

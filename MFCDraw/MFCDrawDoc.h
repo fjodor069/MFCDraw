@@ -10,10 +10,7 @@ const int TOTAL_WIDTH = 21600, TOTAL_HEIGHT = 27900;
 enum ApplicationState {	SINGLE_DRAG, MULTIPLE_DRAG, RECTANGLE_DRAG, EDIT_TEXT, IDLE };
 enum NextActionState { ADD_LINE, ADD_ARROW, ADD_RECTANGLE,ADD_ELLIPSE, ADD_TEXT, MODIFY_FIGURE };
 
-//in text figure.h :
-//enum KeyboardState { KM_INSERT, KM_OVERWRITE };
 
-//typedef MyList<Figure*>  FigurePointerList;
 
 class CMFCDrawDoc : public CDocument
 {

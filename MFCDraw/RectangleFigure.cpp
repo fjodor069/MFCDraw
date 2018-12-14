@@ -159,6 +159,22 @@ void RectangleFigure::Draw(CDC * pDC) const
 	if (IsFilled())
 	{
 		//fillrectangle
+		//pDC->FillRect();
+		CPen pen(PS_SOLID, 0, (COLORREF)GetColor());
+
+		CPen* pOldPen = pDC->SelectObject(&pen);
+
+		CBrush brush(Utility::Black);
+		CBrush* pOldBrush = pDC->SelectObject(&brush);
+
+		pDC->Rectangle(m_ptTopLeft.x, m_ptTopLeft.y, m_ptBottomRight.x, m_ptBottomRight.y);
+	
+		pDC->FillRect(CRect(m_ptTopLeft, m_ptBottomRight), &brush);
+
+		pDC->SelectObject(pOldBrush);
+		pDC->SelectObject(pOldPen);
+
+
 	}
 	else
 	{
