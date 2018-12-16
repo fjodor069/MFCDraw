@@ -22,12 +22,19 @@ TextFigure::TextFigure(const Utility::Color & color, const CPoint& ptMouse, cons
 {
 }
 
+
+//copy constructor
 TextFigure::TextFigure(const TextFigure & text)
 {
+	m_ptText = text.m_ptText;
+	m_font = text.m_font;
+	m_szText = text.m_szText;
+
 }
 
 Figure * TextFigure::Copy() const
 {
+	// TODO:
 	return nullptr;
 }
 
@@ -38,8 +45,7 @@ void TextFigure::Serialize(CArchive & archive)
 	m_caretArray.Serialize(archive);
 	if (archive.IsStoring())
 	{
-		archive << m_ptText << m_stText << m_szText
-			<< m_iAverageWidth;
+		archive << m_ptText << m_stText << m_szText << m_iAverageWidth;
 	}
 	if (archive.IsLoading())
 	{
@@ -62,6 +68,7 @@ BOOL TextFigure::DoubleClick(const CPoint & ptMouse)
 {
 
 	CRect rcText(m_ptText, m_szText);
+
 	if (rcText.PtInRect(ptMouse))
 	{
 		CPoint ptTextMouse = ptMouse - m_ptText;
@@ -111,26 +118,37 @@ void TextFigure::Move(const CSize & szDistance)
 {
 }
 
+//
+// keydown catches Home, End and leftarrow, rightarrow keys
+// and sets the caret index to the right value
+// also the delete key to delete characters
+//
 BOOL TextFigure::KeyDown(UINT uChar, CDC * pDC)
 {
 
 	int iLength = m_stText.GetLength();
 	switch (uChar)
 	{
-	case VK_HOME:
-		if (m_iEditIndex > 0)
-		{
-			m_iEditIndex = 0;
-		}
-		break;
+		case VK_HOME:
+			if (m_iEditIndex > 0)
+				m_iEditIndex = 0;
+			break;
+		case VK_END:
+			if (m_iEditIndex < m_stText.GetLength())
+				m_iEditIndex = m_stText.GetLength();
+			break;
+
+	
 		// ...
 	}
 	return FALSE;
 
 	
-	
 }
 
+
+// a regular key is pressed
+//
 void TextFigure::CharDown(UINT uChar, CDC * pDC, KeyboardState eKeyboardState)
 {
 	if (m_iEditIndex == m_stText.GetLength())

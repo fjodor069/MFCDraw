@@ -96,14 +96,14 @@ void CMFCDrawView::OnDraw(CDC* pDC)
 		pFigure->Draw(pDC);
 	}
 
-
+	//looopt vast hierop
 	/*const RectangleFigure* pInsideRectangle = pDoc->GetInsideRectangle();
 	if (pInsideRectangle != NULL)
 	{
 		pInsideRectangle->Draw(pDC);
-	}
+	}*/
 
-*/
+
 
 
 	
@@ -252,7 +252,7 @@ void CMFCDrawView::OnLButtonUp(UINT nFlags, CPoint point)
 	ASSERT_VALID(pDoc);
 	pDoc->MouseUp();
 
-	//CScrollView::OnLButtonUp(nFlags, point);
+
 }
 
 
@@ -262,13 +262,13 @@ void CMFCDrawView::OnLButtonDblClk(UINT nFlags, CPoint point)
 	ASSERT_VALID(pDoc);
 	pDoc->DoubleClick(point);
 
-	//CScrollView::OnLButtonDblClk(nFlags, point);
+
 }
 
 
 void CMFCDrawView::OnChar(UINT nChar, UINT nRepCnt, UINT nFlags)
 {
-	// TODO: Add your message handler code here and/or call default
+	
 
 	CScrollView::OnChar(nChar, nRepCnt, nFlags);
 }

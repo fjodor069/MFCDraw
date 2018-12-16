@@ -1,5 +1,9 @@
 #pragma once
 
+//
+// direct subclass of Figure by virtual inheritance 
+// similar to linefigure
+// 
 class ArrowFigure : public virtual Figure, private LineFigure
 {
 public:

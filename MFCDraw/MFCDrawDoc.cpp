@@ -63,6 +63,10 @@ BEGIN_MESSAGE_MAP(CMFCDrawDoc, CDocument)
 	ON_UPDATE_COMMAND_UI(ID_FORMAT_MODIFY, &CMFCDrawDoc::OnUpdateFormatModify)
 	ON_COMMAND(ID_EDIT_DELETE, &CMFCDrawDoc::OnEditDelete)
 	ON_UPDATE_COMMAND_UI(ID_EDIT_DELETE, &CMFCDrawDoc::OnUpdateEditDelete)
+	ON_UPDATE_COMMAND_UI(ID_EDIT_PASTE, &CMFCDrawDoc::OnUpdateEditPaste)
+	ON_UPDATE_COMMAND_UI(ID_EDIT_CUT, &CMFCDrawDoc::OnUpdateEditCut)
+	ON_UPDATE_COMMAND_UI(ID_EDIT_COPY, &CMFCDrawDoc::OnUpdateEditCopy)
+	ON_UPDATE_COMMAND_UI(ID_FORMAT_FILL, &CMFCDrawDoc::OnUpdateFormatFill)
 END_MESSAGE_MAP()
 
 
@@ -643,6 +647,7 @@ void CMFCDrawDoc::OnFormatModify()
 }
 
 
+//choose color
 void CMFCDrawDoc::OnFormatColor()
 {
 	// show the MFC color dialog
@@ -656,6 +661,7 @@ void CMFCDrawDoc::OnFormatColor()
 }
 
 
+//choose font
 void CMFCDrawDoc::OnFormatFont()
 {
 	// TODO: Add your command handler code here
@@ -678,13 +684,13 @@ void CMFCDrawDoc::OnUpdateAddLine(CCmdUI *pCmdUI)
 {
 	pCmdUI->Enable(m_eApplicationState == IDLE);
 	pCmdUI->SetRadio(m_eNextActionState == ADD_LINE);
+	// also possible: 
 	//pCmdUI->SetCheck(m_eNextActionState == ADD_LINE);
 }
 
 
 void CMFCDrawDoc::OnUpdateAddArrow(CCmdUI *pCmdUI)
 {
-	// TODO: Add your command update UI handler code here
 	pCmdUI->Enable(m_eApplicationState == IDLE);
 	pCmdUI->SetRadio(m_eNextActionState == ADD_ARROW);
 }
@@ -692,7 +698,6 @@ void CMFCDrawDoc::OnUpdateAddArrow(CCmdUI *pCmdUI)
 
 void CMFCDrawDoc::OnUpdateAddRectangle(CCmdUI *pCmdUI)
 {
-	// TODO: Add your command update UI handler code here
 	pCmdUI->Enable(m_eApplicationState == IDLE);
 	pCmdUI->SetRadio(m_eNextActionState == ADD_RECTANGLE);
 }
@@ -700,7 +705,6 @@ void CMFCDrawDoc::OnUpdateAddRectangle(CCmdUI *pCmdUI)
 
 void CMFCDrawDoc::OnUpdateAddEllipse(CCmdUI *pCmdUI)
 {
-	// TODO: Add your command update UI handler code here
 	pCmdUI->Enable(m_eApplicationState == IDLE);
 	pCmdUI->SetRadio(m_eNextActionState == ADD_ELLIPSE);
 }
@@ -708,7 +712,6 @@ void CMFCDrawDoc::OnUpdateAddEllipse(CCmdUI *pCmdUI)
 
 void CMFCDrawDoc::OnUpdateAddText(CCmdUI *pCmdUI)
 {
-	// TODO: Add your command update UI handler code here
 	pCmdUI->Enable(m_eApplicationState == IDLE);
 	pCmdUI->SetRadio(m_eNextActionState == ADD_TEXT);
 }
@@ -716,7 +719,6 @@ void CMFCDrawDoc::OnUpdateAddText(CCmdUI *pCmdUI)
 
 void CMFCDrawDoc::OnUpdateFormatModify(CCmdUI *pCmdUI)
 {
-	// TODO: Add your command update UI handler code here
 	pCmdUI->Enable(m_eApplicationState == IDLE);
 	pCmdUI->SetRadio(m_eNextActionState == MODIFY_FIGURE);
 }
@@ -724,12 +726,6 @@ void CMFCDrawDoc::OnUpdateFormatModify(CCmdUI *pCmdUI)
 
 
 
-
-
-void CMFCDrawDoc::OnUpdateEditDelete(CCmdUI *pCmdUI)
-{
-	// TODO: Add your command update UI handler code here
-}
 
 
 
@@ -768,3 +764,48 @@ void CMFCDrawDoc::ClearCopyList()
 {
 }
 
+
+void CMFCDrawDoc::OnUpdateEditDelete(CCmdUI *pCmdUI)
+{
+	// TODO: Add your command update UI handler code here
+}
+
+
+
+void CMFCDrawDoc::OnUpdateEditPaste(CCmdUI *pCmdUI)
+{
+	// TODO: Add your command update UI handler code here
+}
+
+
+void CMFCDrawDoc::OnUpdateEditCut(CCmdUI *pCmdUI)
+{
+	int iMarked = m_figurePtrList.CountIf(IsMarked);
+	pCmdUI->Enable((m_eApplicationState == IDLE) && (iMarked > 0));
+
+
+}
+
+
+void CMFCDrawDoc::OnUpdateEditCopy(CCmdUI *pCmdUI)
+{
+	int iMarked = m_figurePtrList.CountIf(IsMarked);
+	pCmdUI->Enable((m_eApplicationState == IDLE) &&	(iMarked > 0));
+
+}
+
+
+void CMFCDrawDoc::OnUpdateFormatFill(CCmdUI *pCmdUI)
+{
+	switch (m_eNextActionState)
+	{
+		// ...
+	case MODIFY_FIGURE:
+		int iFilled = m_figurePtrList.CountIf(IsMarkedAndFilled);
+		int iNotFilled = m_figurePtrList.CountIf(IsMarkedAndNotFilled);
+		BOOL bAtLeastOne = ((iFilled > 0) || (iNotFilled > 0));
+		pCmdUI->Enable(bAtLeastOne);
+		pCmdUI->SetCheck(bAtLeastOne && (iFilled >= iNotFilled));
+		break;
+	}
+}

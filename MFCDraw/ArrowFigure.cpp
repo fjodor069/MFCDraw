@@ -17,10 +17,9 @@ ArrowFigure::ArrowFigure()
 
 ArrowFigure::ArrowFigure(const Utility::Color& color, const CPoint& ptMouse)
 	: Figure(color),
-	  LineFigure()
+	  LineFigure(color,ptMouse)
 {
-	m_ptLeft = ptMouse;
-	m_ptRight = ptMouse;
+	SetArrowPoints();
 	
 }
 
@@ -57,10 +56,16 @@ BOOL ArrowFigure::DoubleClick(const CPoint & ptMouse)
 
 void ArrowFigure::MoveOrModify(const CSize & szDistance)
 {
+	LineFigure::MoveOrModify(szDistance);
+	SetArrowPoints();
+
 }
 
 void ArrowFigure::Move(const CSize & szDistance)
 {
+	LineFigure::Move(szDistance);
+	m_ptLeft += szDistance;
+	m_ptRight += szDistance;
 }
 
 void ArrowFigure::Draw(CDC * pDC) const
@@ -71,6 +76,8 @@ void ArrowFigure::Draw(CDC * pDC) const
 	pDC->MoveTo(m_ptLast);
 	pDC->LineTo(m_ptLeft);
 	pDC->MoveTo(m_ptLast);
+	pDC->LineTo(m_ptRight);
+	pDC->MoveTo(m_ptLeft);
 	pDC->LineTo(m_ptRight);
 	pDC->SelectObject(pOldPen);
 
@@ -94,11 +101,13 @@ void ArrowFigure::SetArrowPoints()
 {
 	int iHeight = m_ptLast.y - m_ptFirst.y;
 	int iWidth = m_ptLast.x - m_ptFirst.x;
+
 	const double PI = 3.14159265;
+
 	double dAlpha = atan2((double)iHeight, (double)iWidth);
 	double dBeta = dAlpha + PI;
-	double dLeftAngle = dBeta - PI / 4;
-	double dRightAngle = dBeta + PI / 4;
+	double dLeftAngle = dBeta - (PI / 4);
+	double dRightAngle = dBeta + (PI / 4);
 	m_ptLeft.x = m_ptLast.x + (int)(ARROW_LENGTH * cos(dLeftAngle));
 	m_ptLeft.y = m_ptLast.y + (int)(ARROW_LENGTH * sin(dLeftAngle));
 	m_ptRight.x = m_ptLast.x + (int)(ARROW_LENGTH * cos(dRightAngle));

@@ -1,5 +1,8 @@
 #pragma once
 
+//
+// sub class of Figure and base class of RectangleFigure and EllipseFigure
+//
 
 class TwoDimensionalFigure : public Figure
 {

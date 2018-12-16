@@ -9,7 +9,7 @@
 
 
 RectangleFigure::RectangleFigure()
-	: TwoDimensionalFigure(Utility::Black,FALSE),
+	: TwoDimensionalFigure(),
 	  m_eDragMode(CREATE_RECTANGLE)
 {
 }
@@ -20,27 +20,72 @@ RectangleFigure::RectangleFigure(const Utility::Color & color, const CPoint & pt
 {
 }
 
+//copy constructor
 RectangleFigure::RectangleFigure(const RectangleFigure & rectangle)
 {
+	m_ptTopLeft = rectangle.m_ptTopLeft;
+	m_ptBottomRight = rectangle.m_ptBottomRight;
+
 }
 
 Figure * RectangleFigure::Copy() const
 {
-	return nullptr;
+	// TODO: copy an item
+	Figure* myFigure;
+
+	myFigure = new RectangleFigure(*this);
+	return myFigure;
 }
 
 void RectangleFigure::Serialize(CArchive & archive)
 {
 	TwoDimensionalFigure::Serialize(archive);
-	//
+
+	if (archive.IsStoring())
+	{
+		archive << m_ptTopLeft;
+		archive << m_ptBottomRight;
+
+	}
+	if (archive.IsLoading())
+	{
+		archive >> m_ptTopLeft;
+		archive >> m_ptBottomRight;
+
+	}
+	
 
 }
 
 HCURSOR RectangleFigure::GetCursor() const
 {
-	return HCURSOR();
+	HCURSOR myCursor;
+
+
+	switch (m_eDragMode)
+	{
+		case MODIFY_TOPLEFT:
+		case MODIFY_BOTTOMRIGHT:
+			myCursor = AfxGetApp()->LoadStandardCursor(IDC_SIZENWSE);
+			break;
+		case MODIFY_TOPRIGHT:
+		case MODIFY_BOTTOMLEFT:
+			myCursor =  AfxGetApp()->LoadStandardCursor(IDC_SIZENESW);
+			break;
+
+		case MOVE_RECTANGLE:
+			return AfxGetApp()->LoadStandardCursor(IDC_SIZEALL);
+			break;
+
+	}
+
+
+	return myCursor;
 }
 
+
+//determine which corner the user clicks and return as dragmode
+//
 BOOL RectangleFigure::Click(const CPoint & ptMouse)
 {
 	// Did the user click on the top left corner?
@@ -112,11 +157,14 @@ BOOL RectangleFigure::Click(const CPoint & ptMouse)
 
 BOOL RectangleFigure::DoubleClick(const CPoint & ptMouse)
 {
+	// TODO : fill or unfill the rectangle
+	
 	return 0;
 }
 
 BOOL RectangleFigure::Inside(const CRect & rcInside) const
 {
+	// TODO : return true when top left and bottom right corners are enclosed 
 	return 0;
 }
 
@@ -125,19 +173,22 @@ void RectangleFigure::MoveOrModify(const CSize & szDistance)
 	switch (m_eDragMode)
 	{
 	case CREATE_RECTANGLE:
-		m_ptTopLeft += szDistance;
+		m_ptBottomRight += szDistance;
 		break;
 	case MODIFY_TOPLEFT:
 		m_ptTopLeft += szDistance;
+		
 		break;
 	case MODIFY_TOPRIGHT:
-		m_ptTopLeft += szDistance;
+		m_ptBottomRight.x += szDistance.cx;
+		m_ptTopLeft.y += szDistance.cy;
 		break;
 	case MODIFY_BOTTOMRIGHT:
 		m_ptBottomRight += szDistance;
 		break;
 	case MODIFY_BOTTOMLEFT:
-		m_ptBottomRight += szDistance;
+		m_ptTopLeft.x += szDistance.cx;
+		m_ptBottomRight.y += szDistance.cy;
 		break;
 	case MOVE_RECTANGLE:
 		Move(szDistance);
@@ -147,8 +198,10 @@ void RectangleFigure::MoveOrModify(const CSize & szDistance)
 
 void RectangleFigure::Move(const CSize & szDistance)
 {
+	//Invalidate();
 	m_ptTopLeft += szDistance;
 	m_ptBottomRight += szDistance; 
+//	Invalidate();
 	
 }
 
@@ -159,15 +212,16 @@ void RectangleFigure::Draw(CDC * pDC) const
 	if (IsFilled())
 	{
 		//fillrectangle
-		//pDC->FillRect();
+		
 		CPen pen(PS_SOLID, 0, (COLORREF)GetColor());
 
 		CPen* pOldPen = pDC->SelectObject(&pen);
 
-		CBrush brush(Utility::Black);
+		//fill color is the same as the edge
+		CBrush brush((COLORREF)GetColor());
 		CBrush* pOldBrush = pDC->SelectObject(&brush);
 
-		pDC->Rectangle(m_ptTopLeft.x, m_ptTopLeft.y, m_ptBottomRight.x, m_ptBottomRight.y);
+		//pDC->Rectangle(m_ptTopLeft.x, m_ptTopLeft.y, m_ptBottomRight.x, m_ptBottomRight.y);
 	
 		pDC->FillRect(CRect(m_ptTopLeft, m_ptBottomRight), &brush);
 

@@ -12,14 +12,16 @@
 TwoDimensionalFigure::TwoDimensionalFigure() 
 	: m_bFilled(FALSE)
 {
+	//empty
 }
 
 
 
 TwoDimensionalFigure::TwoDimensionalFigure(const Utility::Color & color, BOOL bFilled)
-	: Figure(color,bFilled),
+	: Figure(color),
 	m_bFilled(bFilled)
 {
+	//empty
 }
 
 void TwoDimensionalFigure::Serialize(CArchive & archive)

@@ -1,7 +1,11 @@
 #pragma once
 
 // Figure MFC class
-
+//
+// this is an abstract base class
+// it handles the color and mark status of a drawing figure
+// the virtual methods are to be defined in the subclasses
+//
 class Figure : public CObject
 {
 public:
@@ -30,8 +34,8 @@ private:
 	Utility::Color m_figureColor;
 
 protected:
-	static const int SQUARE_SIDE = 200;
-
+	static const int SQUARE_SIDE = 200;		//size of the black squares marking a figure
+											//in 200 logical units ; or 200*1/100 mm = 2 mm
 
 };
 

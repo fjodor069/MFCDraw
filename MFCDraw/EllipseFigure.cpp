@@ -12,30 +12,67 @@
 
 EllipseFigure::EllipseFigure()
 	: TwoDimensionalFigure(),
-	  RectangleFigure()
+	  RectangleFigure(),
+	m_eDragMode(CREATE_ELLIPSE)
 {
+	
 }
 
 EllipseFigure::EllipseFigure(const Utility::Color & color, const CPoint & ptTopLeft, BOOL bFilled)
-	: TwoDimensionalFigure(),
-	  RectangleFigure()
+	: 
+	  RectangleFigure(color,ptTopLeft,bFilled),
+	TwoDimensionalFigure(color,bFilled),
+	m_eDragMode(CREATE_ELLIPSE)
 {
 }
 
+
+//copy constructor
 EllipseFigure::EllipseFigure(const EllipseFigure & ellipse)
 	: TwoDimensionalFigure(),
 	RectangleFigure()
 {
+	//empty
 }
 
 Figure * EllipseFigure::Copy() const
 {
-	return nullptr;
+	Figure* myFigure;
+
+	myFigure = new EllipseFigure(*this);
+	return myFigure;
 }
 
 HCURSOR EllipseFigure::GetCursor() const
 {
-	return HCURSOR();
+	HCURSOR myCursor;
+
+
+	switch (m_eDragMode)
+	{
+	case CREATE_ELLIPSE:
+		myCursor = AfxGetApp()->LoadStandardCursor(IDC_CROSS);
+		break;
+	case MODIFY_LEFT:
+	case MODIFY_RIGHT:
+		myCursor = AfxGetApp()->LoadStandardCursor(IDC_SIZEWE);
+		break;
+	case MODIFY_TOP:
+	case MODIFY_BOTTOM:
+		myCursor = AfxGetApp()->LoadStandardCursor(IDC_SIZENS);
+		break;
+
+	case MOVE_ELLIPSE:
+		return AfxGetApp()->LoadStandardCursor(IDC_SIZEALL);
+		break;
+
+	}
+
+
+	return myCursor;
+
+
+	
 }
 
 BOOL EllipseFigure::Click(const CPoint & ptMouse)
@@ -109,8 +146,7 @@ BOOL EllipseFigure::Click(const CPoint & ptMouse)
 			xMax + (SQUARE_SIDE / 2),
 			yMax + (SQUARE_SIDE / 2));
 		m_eDragMode = MOVE_ELLIPSE;
-		return rgLargeArea.PtInRegion(ptMouse) &&
-			!rgSmallArea.PtInRegion(ptMouse);
+		return rgLargeArea.PtInRegion(ptMouse) && !rgSmallArea.PtInRegion(ptMouse);
 	}
 
 
@@ -119,10 +155,69 @@ BOOL EllipseFigure::Click(const CPoint & ptMouse)
 
 void EllipseFigure::MoveOrModify(const CSize & szDistance)
 {
+	switch (m_eDragMode)
+	{
+	case CREATE_ELLIPSE:
+		m_ptTopLeft += szDistance;
+		break;
+	case MODIFY_LEFT:
+		m_ptTopLeft.x += szDistance.cx;
+		break;
+	case MODIFY_RIGHT:
+		m_ptBottomRight.x += szDistance.cx;
+		break;
+	case MODIFY_TOP:
+		m_ptTopLeft.y += szDistance.cy;
+		break;
+	case MODIFY_BOTTOM:
+		m_ptBottomRight.y += szDistance.cy;
+		break;
+
+	case MOVE_ELLIPSE:
+		Move(szDistance);
+		break;
+	}
 }
 
 void EllipseFigure::Draw(CDC * pDC) const
 {
+
+	if (IsFilled())
+	{
+
+		CPen pen(PS_SOLID, 0, (COLORREF)GetColor());
+
+		CPen* pOldPen = pDC->SelectObject(&pen);
+
+		//fill color is the same as the edge
+		CBrush brush((COLORREF)GetColor());
+		CBrush* pOldBrush = pDC->SelectObject(&brush);
+
+		pDC->Ellipse(m_ptTopLeft.x, m_ptTopLeft.y, m_ptBottomRight.x, m_ptBottomRight.y);
+	
+
+		pDC->SelectObject(pOldBrush);
+		pDC->SelectObject(pOldPen);
+
+
+
+	}
+	else
+	{
+
+		CPen pen(PS_SOLID, 0, (COLORREF)GetColor());
+
+		CPen* pOldPen = pDC->SelectObject(&pen);
+
+		pDC->Ellipse(m_ptTopLeft.x, m_ptTopLeft.y, m_ptBottomRight.x, m_ptBottomRight.y);
+
+
+		pDC->SelectObject(pOldPen);
+	}
+	if (IsMarked())
+	{
+		//do TODO:
+	}
 }
 
 

@@ -32,7 +32,10 @@ LineFigure::LineFigure(const LineFigure& line)
 
 Figure* LineFigure::Copy() const
 {
-	return nullptr;
+	Figure* myFigure;
+
+	myFigure = new LineFigure(*this);
+	return myFigure;
 }
 
 void LineFigure::Serialize(CArchive& archive)
@@ -54,7 +57,20 @@ void LineFigure::Serialize(CArchive& archive)
 
 HCURSOR LineFigure::GetCursor() const
 {
-	return HCURSOR();
+	HCURSOR myCursor;
+
+	switch (m_eDragMode)
+	{
+		case CREATE_LINE:
+		case MODIFY_FIRST:
+		case MODIFY_LAST:
+			myCursor = AfxGetApp()->LoadStandardCursor(IDC_CROSS);
+			break;
+		case MOVE_LINE:
+			myCursor = AfxGetApp()->LoadStandardCursor(IDC_SIZEALL);
+			break;
+	}
+	return myCursor;
 }
 
 BOOL LineFigure::Click(const CPoint & ptMouse)
@@ -100,10 +116,8 @@ BOOL LineFigure::Click(const CPoint & ptMouse)
 		rcLine.NormalizeRect();
 		if (rcLine.PtInRect(ptMouse))
 		{
-			CPoint ptMin = (m_ptFirst.x < m_ptLast.x)
-				? m_ptFirst : m_ptLast;
-			CPoint ptMax = (m_ptFirst.x < m_ptLast.x)
-				? m_ptLast : m_ptFirst;
+			CPoint ptMin = (m_ptFirst.x < m_ptLast.x) 	? m_ptFirst : m_ptLast;
+			CPoint ptMax = (m_ptFirst.x < m_ptLast.x) 	? m_ptLast : m_ptFirst;
 			int cxLine = ptMax.x - ptMin.x;
 			int cyLine = ptMax.y - ptMin.y;
 			int cxMouse = ptMouse.x - ptMin.x;
@@ -124,7 +138,9 @@ BOOL LineFigure::DoubleClick(const CPoint & ptMouse)
 
 BOOL LineFigure::Inside(const CRect & rcInside) const
 {
-	return 0;
+	return (rcInside.PtInRect(m_ptFirst) &&	rcInside.PtInRect(m_ptLast));
+	
+	
 }
 
 void LineFigure::MoveOrModify(const CSize & szDistance)
@@ -167,6 +183,7 @@ void LineFigure::Draw(CDC * pDC) const
 
 	if (IsMarked())
 	{
+		//add two squares to both endpoints
 		CPen pen(PS_SOLID, 0, Utility::Black); 
 		CPen* pOldPen = pDC->SelectObject(&pen);
 		CBrush brush(Utility::Black);

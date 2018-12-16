@@ -1,6 +1,9 @@
 #pragma once
 
-
+// direct subclass of Figure with virtual inheritance
+// base class for ArrowFigure
+// class to draw straight lines between two points
+//
 
 class LineFigure : public virtual Figure
 {

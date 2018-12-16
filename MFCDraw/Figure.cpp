@@ -19,6 +19,7 @@ Figure::Figure()
 	: m_figureColor(0),
 	  m_bMarked(FALSE)
 {
+	//empty
 }
 
 
@@ -27,6 +28,7 @@ Figure::Figure(const Color & color, BOOL bMarked)
 	: m_figureColor(color),
 	  m_bMarked(bMarked)
 {
+	//empty
 }
 
 //copy constructor
@@ -34,6 +36,7 @@ Figure::Figure(const Figure & figure)
 	: m_figureColor(figure.m_figureColor),
 	  m_bMarked(figure.m_bMarked)
 {
+	//empty
 }
 
 
