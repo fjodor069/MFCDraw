@@ -95,6 +95,8 @@ void CMFCDrawView::OnDraw(CDC* pDC)
 		CRect rcFigure = pFigure->GetArea();
 		pFigure->Draw(pDC);
 	}
+
+	//loopt vast 
 	/*const RectangleFigure* pInsideRectangle = pDoc->GetInsideRectangle();
 	if (pInsideRectangle != NULL)
 	{
@@ -104,33 +106,25 @@ void CMFCDrawView::OnDraw(CDC* pDC)
 
 
 
-	/*CPoint point = pDoc->m_ptPoint;
-
-	CPen pen(PS_SOLID, 0, pDoc->m_nextColor);
-	CBrush brush(pDoc->m_nextFillColor);
-
-	CPen* pOldPen = pDC->SelectObject(&pen);
-	CBrush* pOldBrush = pDC->SelectObject(&brush);
-
-	pDC->Ellipse(point.x - 10, point.y - 10, point.x + 10, point.y + 10);
-
-	pDC->SelectObject(&pOldPen);
-	pDC->SelectObject(&pOldBrush);*/
+	
 
 	
 }
 
 // set the size of the view you can scroll
 // and the mapping mode
+// see also OnCreate
 //
 void CMFCDrawView::OnInitialUpdate()
 {
 	CScrollView::OnInitialUpdate();
 
-	CSize sizeTotal;
+	//CSize sizeTotal;
 	// TODO: calculate the total size of this view
-	sizeTotal.cx = sizeTotal.cy = 100;
-	SetScrollSizes(MM_TEXT, sizeTotal);
+
+
+	//sizeTotal.cx = sizeTotal.cy = 100;
+	//SetScrollSizes(MM_TEXT, sizeTotal);
 }
 
 
@@ -304,10 +298,13 @@ void CMFCDrawView::OnKeyDown(UINT nChar, UINT nRepCnt, UINT nFlags)
 
 //
 // added with override
+//
+// process the information passed to UpdateAllViews
 // 
-void CMFCDrawView::OnUpdate(CView* /*pSender*/, LPARAM lHint, CObject* /*pHint*/)
+void CMFCDrawView::OnUpdate(CView* pSender, LPARAM lHint, CObject* pHint)
 {
-	// TODO: Add your specialized code here and/or call the base class
+	//invalidate the area corresponding to the element pointed to 
+	//by the third argument, otherwise invalidate the whole client area
 
 	if (lHint != NULL)
 	{
@@ -325,9 +322,10 @@ void CMFCDrawView::OnUpdate(CView* /*pSender*/, LPARAM lHint, CObject* /*pHint*/
 	}
 	else
 	{
-		Invalidate();
+		//Invalidate();
+		InvalidateRect(nullptr);
 	}
-	UpdateWindow();
+	//UpdateWindow();
 
 
 
