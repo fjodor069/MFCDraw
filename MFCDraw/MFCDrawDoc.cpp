@@ -240,7 +240,7 @@ void CMFCDrawDoc::MouseDown(CPoint ptMouse, BOOL bControlKeyDown, CDC * pDC)
 			m_figurePtrList.AddTail(m_pSingleFigure);
 			m_eApplicationState = SINGLE_DRAG;
 			SetModifiedFlag();
-			afxDump << "Create line \n" ;
+			//afxDump << "Create line \n" ;
 			break;
 
 		case ADD_ARROW:
@@ -248,7 +248,7 @@ void CMFCDrawDoc::MouseDown(CPoint ptMouse, BOOL bControlKeyDown, CDC * pDC)
 			m_figurePtrList.AddTail(m_pSingleFigure);
 			m_eApplicationState = SINGLE_DRAG;
 			SetModifiedFlag();
-			afxDump << "Create arrow \n";
+			//afxDump << "Create arrow \n";
 			
 			break;
 
@@ -257,7 +257,7 @@ void CMFCDrawDoc::MouseDown(CPoint ptMouse, BOOL bControlKeyDown, CDC * pDC)
 			m_figurePtrList.AddTail(m_pSingleFigure);
 			m_eApplicationState = SINGLE_DRAG;
 			SetModifiedFlag();
-			afxDump << "Create rectangle \n";
+			//afxDump << "Create rectangle \n";
 			break;
 
 		case ADD_ELLIPSE:
@@ -265,7 +265,7 @@ void CMFCDrawDoc::MouseDown(CPoint ptMouse, BOOL bControlKeyDown, CDC * pDC)
 			m_figurePtrList.AddTail(m_pSingleFigure);
 			m_eApplicationState = SINGLE_DRAG;
 			SetModifiedFlag();
-			afxDump << "Create ellipse \n";
+			//afxDump << "Create ellipse \n";
 			break;
 
 		//keep adding text until return or escape is pressed
@@ -277,11 +277,14 @@ void CMFCDrawDoc::MouseDown(CPoint ptMouse, BOOL bControlKeyDown, CDC * pDC)
 			CRect rcCaret = m_pEditText->GetCaretArea(m_eKeyboardState);
 			m_caret.SetAndShowCaret(rcCaret);
 			SetModifiedFlag();
-			afxDump << "Create text \n";
+			//afxDump << "Create text \n";
 		}
 		break;
 
 		case MODIFY_FIGURE:
+			
+			afxDump << "CDoc: Modify Figure \n";
+
 			if (!bControlKeyDown)
 			{
 				UnmarkAllFigures();
@@ -334,6 +337,7 @@ void CMFCDrawDoc::MouseDown(CPoint ptMouse, BOOL bControlKeyDown, CDC * pDC)
 			}
 			else
 			{
+				afxDump << "CDoc: creating a drag rectangle \n";
 				check_memory(m_pDragRectangle = new RectangleFigure(Utility::Gray, ptMouse, FALSE));
 				m_eApplicationState = RECTANGLE_DRAG;
 			}
@@ -648,7 +652,10 @@ void CMFCDrawDoc::OnEditPaste()
 
 void CMFCDrawDoc::OnFormatModify()
 {
-	// TODO: Add your command handler code here
+	// 
+	//resolved ; added code to enable modify figure
+	//
+	m_eNextActionState = MODIFY_FIGURE;
 }
 
 

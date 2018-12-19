@@ -193,16 +193,19 @@ void LineFigure::Draw(CDC * pDC) const
 		CPen* pOldPen = pDC->SelectObject(&pen);
 		CBrush brush(Utility::Black);
 		CBrush* pOldBrush = pDC->SelectObject(&brush);
+
 		CRect rcFirst(m_ptFirst.x - (SQUARE_SIDE / 2),
-			m_ptFirst.y - (SQUARE_SIDE / 2),
-			m_ptFirst.x + (SQUARE_SIDE / 2),
-			m_ptFirst.y + (SQUARE_SIDE / 2));
+					  m_ptFirst.y - (SQUARE_SIDE / 2),
+					  m_ptFirst.x + (SQUARE_SIDE / 2),
+					  m_ptFirst.y + (SQUARE_SIDE / 2));
 		pDC->Rectangle(rcFirst);
+
 		CRect rcLast(m_ptLast.x - (SQUARE_SIDE / 2),
-			m_ptLast.y - (SQUARE_SIDE / 2),
-			m_ptLast.x + (SQUARE_SIDE / 2),
-			m_ptLast.y + (SQUARE_SIDE / 2));
+					 m_ptLast.y - (SQUARE_SIDE / 2),
+					 m_ptLast.x + (SQUARE_SIDE / 2),
+					 m_ptLast.y + (SQUARE_SIDE / 2));
 		pDC->Rectangle(rcLast);
+
 		pDC->SelectObject(pOldPen);
 		pDC->SelectObject(pOldBrush);
 	}
