@@ -655,6 +655,9 @@ void CMFCDrawDoc::OnFormatModify()
 	// 
 	//resolved ; added code to enable modify figure
 	//
+	//clear markings ??? also the existing figures
+	UnmarkAllFigures();
+	//start new marking
 	m_eNextActionState = MODIFY_FIGURE;
 }
 

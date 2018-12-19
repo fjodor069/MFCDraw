@@ -246,6 +246,45 @@ void RectangleFigure::Draw(CDC * pDC) const
 	}
 	if (IsMarked())
 	{
+		//add four squares to all corners
+		//use fillsolidrect ??
+		CPen pen(PS_SOLID, 0, Utility::Black);
+		CPen* pOldPen = pDC->SelectObject(&pen);
+		CBrush brush(Utility::Black);
+		CBrush* pOldBrush = pDC->SelectObject(&brush);
+
+		CRect rcTopLeft(m_ptTopLeft.x - (SQUARE_SIDE / 2),
+			m_ptTopLeft.y - (SQUARE_SIDE / 2),
+			m_ptTopLeft.x + (SQUARE_SIDE / 2),
+			m_ptTopLeft.y + (SQUARE_SIDE / 2));
+		pDC->Rectangle(rcTopLeft);
+
+		CRect rcTopRight(m_ptBottomRight.x - (SQUARE_SIDE / 2),
+			m_ptTopLeft.y - (SQUARE_SIDE / 2),
+			m_ptBottomRight.x + (SQUARE_SIDE / 2),
+			m_ptTopLeft.y + (SQUARE_SIDE / 2));
+		pDC->Rectangle(rcTopRight);
+
+
+		CRect rcBottomLeft(m_ptTopLeft.x - (SQUARE_SIDE / 2),
+			m_ptBottomRight.y - (SQUARE_SIDE / 2),
+			m_ptTopLeft.x + (SQUARE_SIDE / 2),
+			m_ptBottomRight.y + (SQUARE_SIDE / 2));
+		pDC->Rectangle(rcBottomLeft);
+
+
+		CRect rcBottomRight(m_ptBottomRight.x - (SQUARE_SIDE / 2),
+			m_ptBottomRight.y - (SQUARE_SIDE / 2),
+			m_ptBottomRight.x + (SQUARE_SIDE / 2),
+			m_ptBottomRight.y + (SQUARE_SIDE / 2));
+		pDC->Rectangle(rcBottomRight);
+		
+
+
+		pDC->SelectObject(pOldPen);
+		pDC->SelectObject(pOldBrush);
+
+
 
 	}
 
