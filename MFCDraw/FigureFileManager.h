@@ -15,7 +15,7 @@ private:
 	void CreateFigure(int iId);
 
 
-	enum { LINE, ARROW, RECTANGLE, ELLIPSE, TEXT };
+	enum FigureID { LINE, ARROW, RECTANGLE, ELLIPSE, TEXT };
 	Figure* m_pFigure;
 
 };

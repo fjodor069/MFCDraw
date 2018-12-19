@@ -12,12 +12,17 @@ RectangleFigure::RectangleFigure()
 	: TwoDimensionalFigure(),
 	  m_eDragMode(CREATE_RECTANGLE)
 {
+	//empty
 }
 
-RectangleFigure::RectangleFigure(const Utility::Color & color, const CPoint & ptTopLeft, BOOL bFilled)
+RectangleFigure::RectangleFigure(const Utility::Color & color, const CPoint& ptTopLeft, BOOL bFilled)
 	: TwoDimensionalFigure(color,bFilled),
 	m_eDragMode(CREATE_RECTANGLE)
+	
 {
+	//initialise the starting point of this figure
+	m_ptTopLeft = ptTopLeft;
+	m_ptBottomRight = ptTopLeft;
 }
 
 //copy constructor

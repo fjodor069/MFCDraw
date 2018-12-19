@@ -57,7 +57,7 @@ BEGIN
     BUTTON      ID_EDIT_CUT
     BUTTON      ID_EDIT_COPY
     BUTTON      ID_EDIT_PASTE
-    SEPARATOR
+    BUTTON      ID_EDIT_DELETE
     BUTTON      ID_FILE_PRINT
     BUTTON      ID_APP_ABOUT
     SEPARATOR
@@ -66,6 +66,7 @@ BEGIN
     BUTTON      ID_ADD_RECTANGLE
     BUTTON      ID_ADD_ELLIPSE
     BUTTON      ID_ADD_TEXT
+    BUTTON      ID_FORMAT_MODIFY
 END
 
 
@@ -281,6 +282,7 @@ END
 STRINGTABLE
 BEGIN
     IDP_OLE_INIT_FAILED     "OLE initialization failed.  Make sure that the OLE libraries are the correct version."
+    ID_INDICATOR_TIME       "MMMMMM"
 END
 
 STRINGTABLE
@@ -410,15 +412,16 @@ BEGIN
     ID_ADD_LINE             "Add a Line to the Drawing"
     ID_ADD_RECTANGLE        "Add a Rectangle to the Drawing"
     ID_ADD_ELLIPSE          "Add an Ellipse to the Drawing"
+    ID_ADD_TEXT             "Add a TextFigure to the drawing \nAddTextFigure"
     ID_ADD_ARROW            "Add an Arrow to the Drawing"
-    ID_FORMAT_MODIFY        "Modify a Figure in the Drawing"
+    ID_FORMAT_MODIFY        "Modify a Figure in the Drawing \nModify Figure"
     ID_FORMAT_COLOR         "Set the Color of a Figure\nFigure"
-    ID_FORMAT_FILL          "Fill a Figure"
+    ID_FORMAT_FILL          "Fill a Figure \nFill"
 END
 
 STRINGTABLE
 BEGIN
-    ID_FORMAT_FONT          "Set the Font of a TextFigure"
+    ID_FORMAT_FONT          "Set the Font of a TextFigure \nFont"
 END
 
 STRINGTABLE

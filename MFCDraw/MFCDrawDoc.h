@@ -63,7 +63,7 @@ private:
 	TextFigure* m_pEditText;
 	RectangleFigure* m_pDragRectangle;
 
-	FigurePointerList m_figurePtrList, m_copyPtrList;
+	FigurePointerList m_figurePtrList, m_copyPtrList;		//list of objects 
 
 	CPoint m_ptPrevMouse;					//the previous mouse position
 
@@ -77,7 +77,7 @@ public:
 
 	Utility::Color m_nextColor;			//the current drawing color
 	Utility::Color m_nextFillColor;		//not used
-	BOOL m_bNextFill;					//is the figure to be filled 
+	BOOL m_bNextFill;					//is the figure to be filled or not
 
 	const FigurePointerList* GetFigurePtrList() const
 	{

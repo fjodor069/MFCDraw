@@ -23,7 +23,7 @@ public:
 	virtual void OnDraw(CDC* pDC);  // overridden to draw this view
 	virtual BOOL PreCreateWindow(CREATESTRUCT& cs);
 protected:
-	virtual void OnInitialUpdate(); // called first time after construct
+
 	virtual BOOL OnPreparePrinting(CPrintInfo* pInfo);
 	virtual void OnBeginPrinting(CDC* pDC, CPrintInfo* pInfo);
 	virtual void OnEndPrinting(CDC* pDC, CPrintInfo* pInfo);
@@ -56,6 +56,9 @@ public:
 private:
 	
 	virtual void OnUpdate(CView* pSender, LPARAM lHint, CObject* pHint);
+protected:
+	CPoint m_ptFirstPoint;			//used from sketcher
+	CPoint m_ptSecondPoint;			//used from sketcher
 };
 
 #ifndef _DEBUG  // debug version in MFCDrawView.cpp

@@ -60,19 +60,23 @@ END_MESSAGE_MAP()
 // CMFCDrawView construction/destruction
 
 CMFCDrawView::CMFCDrawView()
+	: m_ptFirstPoint(0,0),
+	m_ptSecondPoint(0,0)
 {
-	// TODO: add construction code here
+	// empty
 
 }
 
 CMFCDrawView::~CMFCDrawView()
 {
+	//empty
 }
 
 BOOL CMFCDrawView::PreCreateWindow(CREATESTRUCT& cs)
 {
-	// TODO: Modify the Window class or styles here by modifying
+	//  Modify the Window class or styles here by modifying
 	//  the CREATESTRUCT cs
+	// not used here
 
 	return CScrollView::PreCreateWindow(cs);
 }
@@ -88,41 +92,34 @@ void CMFCDrawView::OnDraw(CDC* pDC)
 
 	const FigurePointerList* pFigurePtrList = pDoc->GetFigurePtrList();
 
+	//iterate through the list of objects ... and draw them
+	//
 	for (POSITION position = pFigurePtrList->GetHeadPosition();
 		position != NULL; pFigurePtrList->GetNext(position))
 	{
 		Figure* pFigure = pFigurePtrList->GetAt(position);
 		CRect rcFigure = pFigure->GetArea();
-		pFigure->Draw(pDC);
+		if (pFigure != NULL)			//do extra check ..
+			pFigure->Draw(pDC);
 	}
 
 	//looopt vast hierop
-	/*const RectangleFigure* pInsideRectangle = pDoc->GetInsideRectangle();
+	const RectangleFigure* pInsideRectangle = pDoc->GetInsideRectangle();
 	if (pInsideRectangle != NULL)
 	{
-		pInsideRectangle->Draw(pDC);
-	}*/
-
-
-
+		TRACE(_T("dumping the inside rectangle \n"));
+		//afxDump << (CObject&)pInsideRectangle;
+		//possible not initialised ???
+		//pInsideRectangle->Dump;
+	//	pInsideRectangle->Draw(pDC);
+	}
 
 	
 
 	
 }
 
-// set the size of the view you can scroll
-// and the mapping mode
-//
-void CMFCDrawView::OnInitialUpdate()
-{
-	CScrollView::OnInitialUpdate();
 
-	CSize sizeTotal;
-	// TODO: calculate the total size of this view
-	sizeTotal.cx = sizeTotal.cy = 100;
-	SetScrollSizes(MM_TEXT, sizeTotal);
-}
 
 
 // CMFCDrawView printing
@@ -170,7 +167,9 @@ CMFCDrawDoc* CMFCDrawView::GetDocument() const // non-debug version is inline
 
 void CMFCDrawView::OnLButtonDown(UINT nFlags, CPoint point)
 {
-	
+	m_ptFirstPoint = point;
+
+
 	CClientDC dc(this);
 	OnPrepareDC(&dc);
 
@@ -189,6 +188,8 @@ void CMFCDrawView::OnLButtonDown(UINT nFlags, CPoint point)
 //
 // called after creation but before it is shown
 //
+// see also the OnInitialUpdate handler if it is present
+//
 int CMFCDrawView::OnCreate(LPCREATESTRUCT lpCreateStruct)
 {
 	if (CScrollView::OnCreate(lpCreateStruct) == -1)
@@ -197,6 +198,7 @@ int CMFCDrawView::OnCreate(LPCREATESTRUCT lpCreateStruct)
 
 	CSize szTotal(TOTAL_WIDTH, TOTAL_HEIGHT);
 	SetScrollSizes(MM_HIMETRIC, szTotal);
+	
 
 	return 0;
 }
@@ -240,6 +242,14 @@ BOOL CMFCDrawView::OnSetCursor(CWnd* pWnd, UINT nHitTest, UINT message)
 
 void CMFCDrawView::OnMouseMove(UINT nFlags, CPoint point)
 {
+	// hier zat een belangrijke bug
+	// DPtoLP toegevoegd !!!!
+	//
+	CClientDC dc(this);
+	OnPrepareDC(&dc);
+
+	dc.DPtoLP(&point);
+
 	CMFCDrawDoc* pDoc = GetDocument();
 	ASSERT_VALID(pDoc);
 	pDoc->MouseDrag(point);

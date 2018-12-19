@@ -45,16 +45,28 @@ void FigureFileManager::Serialize(CArchive & archive)
 
 int FigureFileManager::GetId() const
 {
+	//added enum definitions
+	//
 	if (dynamic_cast<ArrowFigure*>(m_pFigure) != NULL)
 	{
-		return ARROW;
+		return FigureID::ARROW;
 	}
 	else if (dynamic_cast<LineFigure*>(m_pFigure) != NULL)
 	{
-		return LINE;
+		return FigureID::LINE;
 	}
-	// ...
-
+	else if (dynamic_cast<RectangleFigure*>(m_pFigure) != NULL)
+	{
+		return FigureID::RECTANGLE;
+	}
+	else if (dynamic_cast<EllipseFigure*>(m_pFigure) != NULL)
+	{
+		return FigureID::ELLIPSE;
+	}
+	else if (dynamic_cast<TextFigure*>(m_pFigure) != NULL)
+	{
+		return FigureID::TEXT;
+	}
 	else
 	{
 		check(FALSE);
@@ -68,12 +80,28 @@ void FigureFileManager::CreateFigure(int iId)
 	switch (iId)
 	{
 
-	case LINE:
-		check_memory(m_pFigure = new LineFigure());
-		break;
-		// ...
-	default:
-		check(FALSE);
+		case FigureID::LINE:
+			check_memory(m_pFigure = new LineFigure());
+			break;
+		
+		case FigureID::ARROW:
+			check_memory(m_pFigure = new ArrowFigure());
+			break;
+
+		case FigureID::ELLIPSE:
+			check_memory(m_pFigure = new EllipseFigure());
+			break;
+
+		case FigureID::RECTANGLE:
+			check_memory(m_pFigure = new RectangleFigure());
+			break;
+
+		case FigureID::TEXT:
+			check_memory(m_pFigure = new TextFigure());
+			break;
+			
+		default:
+			check(FALSE);
 	}
 
 }

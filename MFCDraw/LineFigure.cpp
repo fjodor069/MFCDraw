@@ -23,11 +23,12 @@ LineFigure::LineFigure(const Utility::Color& color, const CPoint& ptMouse)
 
 //copy constructor
 LineFigure::LineFigure(const LineFigure& line)
-	: Figure()
+	: Figure(line.GetColor())
 {
 	m_ptFirst = line.m_ptFirst;
 	m_ptLast = line.m_ptLast;
 	m_eDragMode = line.m_eDragMode;
+	
 }
 
 Figure* LineFigure::Copy() const
@@ -175,7 +176,11 @@ void LineFigure::Move(const CSize & szDistance)
 void LineFigure::Draw(CDC * pDC) const
 {
 	CPen pen(PS_SOLID, 0, (COLORREF)GetColor());
-	//CPen pen(PS_SOLID, 0, Utility::Black);
+	
+
+	/*TRACE(_T("First x = %d, y = %d\n", m_ptFirst.x, m_ptFirst.y));
+	TRACE(_T("Last x = %d, y = %d\n", m_ptLast.x, m_ptLast.y));*/
+
 	CPen* pOldPen = pDC->SelectObject(&pen);
 	pDC->MoveTo(m_ptFirst.x, m_ptFirst.y);
 	pDC->LineTo(m_ptLast.x, m_ptLast.y);

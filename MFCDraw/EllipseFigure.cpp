@@ -18,12 +18,13 @@ EllipseFigure::EllipseFigure()
 	
 }
 
-EllipseFigure::EllipseFigure(const Utility::Color & color, const CPoint & ptTopLeft, BOOL bFilled)
+EllipseFigure::EllipseFigure(const Utility::Color & color, const CPoint& ptTopLeft, BOOL bFilled)
 	: 
 	  RectangleFigure(color,ptTopLeft,bFilled),
 	TwoDimensionalFigure(color,bFilled),
 	m_eDragMode(CREATE_ELLIPSE)
 {
+
 }
 
 

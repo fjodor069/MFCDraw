@@ -73,14 +73,15 @@ END_MESSAGE_MAP()
 // CMFCDrawDoc construction/destruction
 
 CMFCDrawDoc::CMFCDrawDoc()
+	
 {
 	//retrieve action state (drawing mode) from registry when initializing
 	m_eNextActionState = (NextActionState)AfxGetApp()->	GetProfileInt(TEXT("MFCDraw"), TEXT("ActionMode"), MODIFY_FIGURE);
 	m_eApplicationState = IDLE;
-	//retrieve color and fill
+	//retrieve color and fill;  the last parameter is the default value in case nothing is stored
 	m_nextColor = (COLORREF)AfxGetApp()->GetProfileInt (TEXT("MFCDraw"), TEXT("CurrentColor"), Utility::Black);
-	m_bNextFill = (BOOL)AfxGetApp()->GetProfileInt	(TEXT("MFCDraw"), TEXT("CurrentFill"), TRUE);
-
+	m_bNextFill = (BOOL)AfxGetApp()->GetProfileInt	(TEXT("MFCDraw"), TEXT("CurrentFill"), FALSE);
+	
 
 
 }
@@ -144,10 +145,6 @@ void CMFCDrawDoc::Serialize(CArchive& ar)
 			pFigure->Serialize(ar);
 			m_figurePtrList.AddTail(pFigure);
 		}
-
-
-
-
 	}
 }
 
@@ -243,6 +240,7 @@ void CMFCDrawDoc::MouseDown(CPoint ptMouse, BOOL bControlKeyDown, CDC * pDC)
 			m_figurePtrList.AddTail(m_pSingleFigure);
 			m_eApplicationState = SINGLE_DRAG;
 			SetModifiedFlag();
+			afxDump << "Create line \n" ;
 			break;
 
 		case ADD_ARROW:
@@ -250,6 +248,8 @@ void CMFCDrawDoc::MouseDown(CPoint ptMouse, BOOL bControlKeyDown, CDC * pDC)
 			m_figurePtrList.AddTail(m_pSingleFigure);
 			m_eApplicationState = SINGLE_DRAG;
 			SetModifiedFlag();
+			afxDump << "Create arrow \n";
+			
 			break;
 
 		case ADD_RECTANGLE:
@@ -257,6 +257,7 @@ void CMFCDrawDoc::MouseDown(CPoint ptMouse, BOOL bControlKeyDown, CDC * pDC)
 			m_figurePtrList.AddTail(m_pSingleFigure);
 			m_eApplicationState = SINGLE_DRAG;
 			SetModifiedFlag();
+			afxDump << "Create rectangle \n";
 			break;
 
 		case ADD_ELLIPSE:
@@ -264,6 +265,7 @@ void CMFCDrawDoc::MouseDown(CPoint ptMouse, BOOL bControlKeyDown, CDC * pDC)
 			m_figurePtrList.AddTail(m_pSingleFigure);
 			m_eApplicationState = SINGLE_DRAG;
 			SetModifiedFlag();
+			afxDump << "Create ellipse \n";
 			break;
 
 		//keep adding text until return or escape is pressed
@@ -275,6 +277,7 @@ void CMFCDrawDoc::MouseDown(CPoint ptMouse, BOOL bControlKeyDown, CDC * pDC)
 			CRect rcCaret = m_pEditText->GetCaretArea(m_eKeyboardState);
 			m_caret.SetAndShowCaret(rcCaret);
 			SetModifiedFlag();
+			afxDump << "Create text \n";
 		}
 		break;
 
@@ -347,6 +350,8 @@ void CMFCDrawDoc::MouseDown(CPoint ptMouse, BOOL bControlKeyDown, CDC * pDC)
 //
 void CMFCDrawDoc::MouseDrag(const CPoint & ptMouse)
 {
+	//calculate distance the mouse has moved
+	//
 	CSize szDistance = ptMouse - m_ptPrevMouse;
 	m_ptPrevMouse = ptMouse;
 
@@ -670,13 +675,16 @@ void CMFCDrawDoc::OnFormatFont()
 
 void CMFCDrawDoc::OnFormatFill()
 {
-	// show the MFC color dialog
-	CColorDialog colorDialog(m_nextColor);
+	//toggle fill
+	m_bNextFill = !m_bNextFill;
 
-	if (colorDialog.DoModal() == IDOK)
-	{
-		m_nextFillColor = colorDialog.GetColor();
-	}
+	//// show the MFC color dialog to choose a fill color
+	//CColorDialog colorDialog(m_nextColor);
+
+	//if (colorDialog.DoModal() == IDOK)
+	//{
+	//	m_nextFillColor = colorDialog.GetColor();
+	//}
 }
 
 
@@ -762,6 +770,10 @@ void CMFCDrawDoc::UnmarkAllFigures()
 
 void CMFCDrawDoc::ClearCopyList()
 {
+
+	m_copyPtrList.RemoveAll();
+	
+
 }
 
 
@@ -808,4 +820,5 @@ void CMFCDrawDoc::OnUpdateFormatFill(CCmdUI *pCmdUI)
 		pCmdUI->SetCheck(bAtLeastOne && (iFilled >= iNotFilled));
 		break;
 	}
+	pCmdUI->SetCheck(m_bNextFill);
 }
