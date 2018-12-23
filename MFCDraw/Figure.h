@@ -37,6 +37,8 @@ protected:
 	static const int SQUARE_SIDE = 200;		//size of the black squares marking a figure
 											//in 200 logical units ; or 200*1/100 mm = 2 mm
 
+public:
+	virtual void Dump(CDumpContext& dc) const;
 };
 
 

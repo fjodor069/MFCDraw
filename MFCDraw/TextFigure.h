@@ -48,5 +48,7 @@ private:
 	IntArray m_caretArray;
 
 
+public:
+	virtual void Dump(CDumpContext& dc) const;
 };
 

@@ -118,3 +118,14 @@ void ArrowFigure::SetArrowPoints()
 
 
 
+
+
+void ArrowFigure::Dump(CDumpContext& dc) const
+{
+	//__super::Dump(dc);
+
+	// TODO: Add your specialized code here and/or call the base class
+	dc << _T("Arrow ") << m_ptFirst << _T(" ") << m_ptLast;;
+
+
+}

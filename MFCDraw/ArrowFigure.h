@@ -26,5 +26,7 @@ private:
 	static const int ARROW_LENGTH = 500;
 
 
+public:
+	virtual void Dump(CDumpContext& dc) const;
 };
 

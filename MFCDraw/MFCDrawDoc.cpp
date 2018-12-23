@@ -82,7 +82,8 @@ CMFCDrawDoc::CMFCDrawDoc()
 	m_nextColor = (COLORREF)AfxGetApp()->GetProfileInt (TEXT("MFCDraw"), TEXT("CurrentColor"), Utility::Black);
 	m_bNextFill = (BOOL)AfxGetApp()->GetProfileInt	(TEXT("MFCDraw"), TEXT("CurrentFill"), FALSE);
 	
-
+	m_pDragRectangle = NULL;
+	m_pSingleFigure = NULL;
 
 }
 
@@ -94,6 +95,22 @@ CMFCDrawDoc::~CMFCDrawDoc()
 	AfxGetApp()->WriteProfileInt(TEXT("MFCDraw"), TEXT("CurrentColor"), (Utility::Color) m_nextColor);
 	AfxGetApp()->WriteProfileInt(TEXT("MFCDraw"), TEXT("CurrentFill"), (BOOL) m_bNextFill);
 
+	if (m_pDragRectangle) delete m_pDragRectangle;
+	
+
+	
+	////clear all objects !! important !!
+	//see override in CDoc::DeleteContents
+
+	//while (!m_figurePtrList.IsEmpty())
+	//{
+	//	m_pSingleFigure = (Figure*) m_figurePtrList.RemoveHead();
+	//	delete m_pSingleFigure;
+	//}
+
+	
+
+		
 
 }
 
@@ -213,6 +230,7 @@ void CMFCDrawDoc::AssertValid() const
 void CMFCDrawDoc::Dump(CDumpContext& dc) const
 {
 	CDocument::Dump(dc);
+	TRACE(_T("CDoc: Dumping document \n"));
 }
 #endif //_DEBUG
 
@@ -240,7 +258,9 @@ void CMFCDrawDoc::MouseDown(CPoint ptMouse, BOOL bControlKeyDown, CDC * pDC)
 			m_figurePtrList.AddTail(m_pSingleFigure);
 			m_eApplicationState = SINGLE_DRAG;
 			SetModifiedFlag();
-			//afxDump << "Create line \n" ;
+			//afxDump << "Create line (" << ptMouse.x << " "<< ptMouse.y << ") \n";
+			
+			TRACE(_T("Line : x = %d y = %d \n"),ptMouse.x,ptMouse.y );
 			break;
 
 		case ADD_ARROW:
@@ -248,7 +268,8 @@ void CMFCDrawDoc::MouseDown(CPoint ptMouse, BOOL bControlKeyDown, CDC * pDC)
 			m_figurePtrList.AddTail(m_pSingleFigure);
 			m_eApplicationState = SINGLE_DRAG;
 			SetModifiedFlag();
-			//afxDump << "Create arrow \n";
+			//afxDump << "Create arrow (" << ptMouse.x << " " << ptMouse.y << ") \n"; 
+			TRACE(_T("Arrow : x = %d y = %d \n"), ptMouse.x, ptMouse.y);
 			
 			break;
 
@@ -257,7 +278,10 @@ void CMFCDrawDoc::MouseDown(CPoint ptMouse, BOOL bControlKeyDown, CDC * pDC)
 			m_figurePtrList.AddTail(m_pSingleFigure);
 			m_eApplicationState = SINGLE_DRAG;
 			SetModifiedFlag();
-			//afxDump << "Create rectangle \n";
+			//afxDump << "Create rectangle (" << ptMouse.x << " " << ptMouse.y << ") \n"; 
+
+			TRACE(_T("Rectangle : x = %d y = %d \n"), ptMouse.x, ptMouse.y);
+			//m_pSingleFigure->Dump(afxDump);
 			break;
 
 		case ADD_ELLIPSE:
@@ -265,7 +289,9 @@ void CMFCDrawDoc::MouseDown(CPoint ptMouse, BOOL bControlKeyDown, CDC * pDC)
 			m_figurePtrList.AddTail(m_pSingleFigure);
 			m_eApplicationState = SINGLE_DRAG;
 			SetModifiedFlag();
-			//afxDump << "Create ellipse \n";
+			//afxDump << "Create ellipse (" << ptMouse.x << " " << ptMouse.y << ") \n"; 
+			TRACE(_T("Ellipse : x = %d y = %d \n"), ptMouse.x, ptMouse.y);
+			//m_pSingleFigure->Dump(afxDump);
 			break;
 
 		//keep adding text until return or escape is pressed
@@ -277,7 +303,9 @@ void CMFCDrawDoc::MouseDown(CPoint ptMouse, BOOL bControlKeyDown, CDC * pDC)
 			CRect rcCaret = m_pEditText->GetCaretArea(m_eKeyboardState);
 			m_caret.SetAndShowCaret(rcCaret);
 			SetModifiedFlag();
-			//afxDump << "Create text \n";
+			//afxDump << "Create text (" << ptMouse.x << " " << ptMouse.y << ") \n"; 
+			TRACE(_T("Text : x = %d y = %d \n"), ptMouse.x, ptMouse.y);
+			//m_pSingleFigure->Dump(afxDump);
 		}
 		break;
 
@@ -688,13 +716,7 @@ void CMFCDrawDoc::OnFormatFill()
 	//toggle fill
 	m_bNextFill = !m_bNextFill;
 
-	//// show the MFC color dialog to choose a fill color
-	//CColorDialog colorDialog(m_nextColor);
-
-	//if (colorDialog.DoModal() == IDOK)
-	//{
-	//	m_nextFillColor = colorDialog.GetColor();
-	//}
+	
 }
 
 
@@ -757,33 +779,65 @@ BOOL CMFCDrawDoc::IsMarked(Figure* pFigure)
 
 BOOL CMFCDrawDoc::IsMarkedText(Figure* pFigure)
 {
-	return 0;
+	//CRuntimeClass* pClass = pFigure->GetRuntimeClass();
+	//BOOL sample = sample1->IsKindOf(pClass);
+	/////*CRuntimeClass* prt = pFigure->GetRuntimeClass();
+	////ASSERT(strcmp(prt->m_lpszClassName, "TextFigure") == 0);*/
+
+	ASSERT(pFigure->IsKindOf(RUNTIME_CLASS(TextFigure)));
+	
+	return pFigure->IsMarked();
 }
 
 
 BOOL CMFCDrawDoc::IsMarkedAndFilled(Figure* pFigure)
 {
-	return 0;
+	
+	
+	return ( pFigure->IsMarked());
 }
 
 
 BOOL CMFCDrawDoc::IsMarkedAndNotFilled(Figure* pFigure)
 {
-	return 0;
+	return pFigure->IsMarked();
 }
 
 
 void CMFCDrawDoc::UnmarkAllFigures()
 {
+	//traverse the figure list and unmark each figure
+	afxDump << "CDoc: UnmarkAllFigures \n";
+
+	for (POSITION position = m_figurePtrList.GetHeadPosition();
+		position != NULL; m_figurePtrList.GetNext(position))
+	{
+		Figure* pFigure = m_figurePtrList.GetAt(position);
+
+
+		//pFigure->Dump(afxDump);
+
+		pFigure->Mark(FALSE);
+		
+		TRACE("Unmarking Figure: \n");
+
+	}
+
 }
 
 
 void CMFCDrawDoc::ClearCopyList()
 {
 
-	m_copyPtrList.RemoveAll();
-	
+	//m_copyPtrList.RemoveAll();
+	Figure* m_pTemp;
 
+	while (!m_copyPtrList.IsEmpty())
+	{
+		m_pTemp = (Figure*)m_figurePtrList.RemoveHead();
+		if (m_pTemp != NULL)
+			delete m_pTemp;
+	}
 }
 
 
@@ -831,4 +885,31 @@ void CMFCDrawDoc::OnUpdateFormatFill(CCmdUI *pCmdUI)
 		break;
 	}
 	pCmdUI->SetCheck(m_bNextFill);
+}
+
+
+void CMFCDrawDoc::DeleteContents()
+{
+
+	//clear all objects !! important !!
+	Figure* m_pTemp;
+	
+	
+	TRACE(_T("CDoc: application state %d \n"),m_eApplicationState);
+	TRACE(_T("CDoc: next action state %d \n"), m_eNextActionState);
+
+
+	
+	while (!m_figurePtrList.IsEmpty() )
+	{
+		
+		m_pTemp = (Figure*)m_figurePtrList.RemoveHead();
+
+		
+		if (m_pTemp != NULL)
+		  delete m_pTemp;
+	}
+
+
+
 }

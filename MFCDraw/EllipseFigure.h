@@ -36,5 +36,7 @@ private:
 		MODIFY_TOP, MODIFY_BOTTOM, MOVE_ELLIPSE
 		 }
 	m_eDragMode;
+public:
+	virtual void Dump(CDumpContext& dc) const;
 };
 

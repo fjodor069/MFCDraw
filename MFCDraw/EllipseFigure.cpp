@@ -217,9 +217,54 @@ void EllipseFigure::Draw(CDC * pDC) const
 	}
 	if (IsMarked())
 	{
-		//do TODO:
+		//add four squares as endpoints to the ellipse
+		CPen pen(PS_SOLID, 0, Utility::Black);
+		CPen* pOldPen = pDC->SelectObject(&pen);
+		CBrush brush(Utility::Black);
+		CBrush* pOldBrush = pDC->SelectObject(&brush);
+
+		int xCenter = (m_ptTopLeft.x + m_ptBottomRight.x) / 2;
+		int yCenter = (m_ptTopLeft.y + m_ptBottomRight.y) / 2;
+
+		CRect rcLeft(m_ptTopLeft.x - (SQUARE_SIDE / 2),
+			yCenter - (SQUARE_SIDE / 2),
+			m_ptTopLeft.x + (SQUARE_SIDE / 2),
+			yCenter + (SQUARE_SIDE / 2));
+		pDC->Rectangle(rcLeft);
+
+		CRect rcRight(m_ptBottomRight.x - (SQUARE_SIDE / 2),
+			yCenter - (SQUARE_SIDE / 2),
+			m_ptBottomRight.x + (SQUARE_SIDE / 2),
+			yCenter + (SQUARE_SIDE / 2));
+		pDC->Rectangle(rcRight);
+
+		CRect rcTop(xCenter - (SQUARE_SIDE / 2),
+			m_ptTopLeft.y - (SQUARE_SIDE / 2),
+			xCenter + (SQUARE_SIDE / 2),
+			m_ptTopLeft.y + (SQUARE_SIDE / 2));
+		pDC->Rectangle(rcTop);
+
+		CRect rcBottom(xCenter - (SQUARE_SIDE / 2),
+			m_ptBottomRight.y - (SQUARE_SIDE / 2),
+			xCenter + (SQUARE_SIDE / 2),
+			m_ptBottomRight.y + (SQUARE_SIDE / 2));
+		pDC->Rectangle(rcBottom);
+
+		pDC->SelectObject(pOldPen);
+		pDC->SelectObject(pOldBrush);
+
+
+
 	}
 }
 
 
 
+
+
+void EllipseFigure::Dump(CDumpContext& dc) const
+{
+	//__super::Dump(dc);
+
+	dc << _T("Ellipse ");
+}

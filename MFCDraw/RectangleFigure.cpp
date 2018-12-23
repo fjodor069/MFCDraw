@@ -310,3 +310,11 @@ CRect RectangleFigure::GetArea() const
 
 
 
+
+
+void RectangleFigure::Dump(CDumpContext& dc) const
+{
+	//TwoDimensionalFigure::Dump(dc);
+
+	dc << _T("Rectangle ") << m_ptTopLeft << _T(" ") << m_ptBottomRight;
+}

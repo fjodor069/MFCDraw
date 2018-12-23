@@ -231,3 +231,12 @@ CRect LineFigure::GetArea() const
 }
 
 
+
+
+void LineFigure::Dump(CDumpContext& dc) const
+{
+	//show diagnostic info for debugging
+	//Figure::Dump(dc);
+
+	dc << _T("Line ") << m_ptFirst << _T(" ") << m_ptLast;
+}

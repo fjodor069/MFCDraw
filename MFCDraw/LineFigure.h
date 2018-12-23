@@ -27,5 +27,7 @@ protected:
 	enum { CREATE_LINE, MODIFY_FIRST, MODIFY_LAST, MOVE_LINE } 	m_eDragMode;
 
 
+public:
+	virtual void Dump(CDumpContext& dc) const;
 };
 

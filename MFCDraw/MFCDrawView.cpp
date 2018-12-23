@@ -103,15 +103,13 @@ void CMFCDrawView::OnDraw(CDC* pDC)
 			pFigure->Draw(pDC);
 	}
 
-	//looopt vast hierop
+	
 	const RectangleFigure* pInsideRectangle = pDoc->GetInsideRectangle();
 	if (pInsideRectangle != NULL)
 	{
-		TRACE(_T("DrawView: dumping the inside rectangle \n"));
-		//afxDump << (CObject&)pInsideRectangle;
-		//possible not initialised ???
-		//pInsideRectangle->Dump;
-	//	pInsideRectangle->Draw(pDC);
+		//TRACE(_T("DrawView: dumping the inside rectangle \n"));
+		
+		pInsideRectangle->Draw(pDC);
 	}
 
 	

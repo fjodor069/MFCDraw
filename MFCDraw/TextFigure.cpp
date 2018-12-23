@@ -315,3 +315,11 @@ void TextFigure::GenerateCaretArray(CDC * pDC)
 }
 
 
+
+
+void TextFigure::Dump(CDumpContext& dc) const
+{
+	//Figure::Dump(dc);
+
+	dc << _T("Text ")  << _T(" ") << m_ptText;
+}

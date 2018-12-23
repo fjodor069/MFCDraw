@@ -126,4 +126,5 @@ public:
 	afx_msg void OnUpdateEditCut(CCmdUI *pCmdUI);
 	afx_msg void OnUpdateEditCopy(CCmdUI *pCmdUI);
 	afx_msg void OnUpdateFormatFill(CCmdUI *pCmdUI);
+	virtual void DeleteContents();
 };

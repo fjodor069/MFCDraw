@@ -47,3 +47,12 @@ void Figure::Serialize(CArchive & archive)
 	CObject::Serialize(archive);
 	m_figureColor.Serialize(archive);
 }
+
+
+void Figure::Dump(CDumpContext& dc) const
+{
+	//CObject::Dump(dc);
+
+	
+	dc << _T("Figure ");
+}

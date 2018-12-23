@@ -24,5 +24,7 @@ private:
 protected:
 	CPoint m_ptTopLeft, m_ptBottomRight;
 
+public:
+	virtual void Dump(CDumpContext& dc) const;
 };
 
