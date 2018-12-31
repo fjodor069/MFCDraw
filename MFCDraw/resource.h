@@ -8,6 +8,8 @@
 #define IDR_MAINFRAME                   128
 #define IDR_MFCDrawTYPE                 130
 #define ID_WINDOW_MANAGER               131
+#define IDD_DIALOG1                     310
+#define IDC_LIST1                       1000
 #define ID_ADD_LINE                     32771
 #define ID_ADD_ARR                      32772
 #define ID_ADD_RECTANGLE                32773
@@ -19,14 +21,15 @@
 #define ID_FORMAT_FONT32779             32779
 #define ID_FORMAT_FILL                  32780
 #define ID_EDIT_DELETE                  32786
+#define ID_VIEW_DEMODIALOG              32794
 
 // Next default values for new objects
 // 
 #ifdef APSTUDIO_INVOKED
 #ifndef APSTUDIO_READONLY_SYMBOLS
-#define _APS_NEXT_RESOURCE_VALUE        310
-#define _APS_NEXT_COMMAND_VALUE         32794
-#define _APS_NEXT_CONTROL_VALUE         1000
-#define _APS_NEXT_SYMED_VALUE           310
+#define _APS_NEXT_RESOURCE_VALUE        312
+#define _APS_NEXT_COMMAND_VALUE         32795
+#define _APS_NEXT_CONTROL_VALUE         1001
+#define _APS_NEXT_SYMED_VALUE           312
 #endif
 #endif

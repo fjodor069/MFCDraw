@@ -186,6 +186,7 @@
     <ClInclude Include="..\..\Utility\MyList.h" />
     <ClInclude Include="ArrowFigure.h" />
     <ClInclude Include="Caret.h" />
+    <ClInclude Include="CFigureDialog.h" />
     <ClInclude Include="ChildFrm.h" />
     <ClInclude Include="Color.h" />
     <ClInclude Include="EllipseFigure.h" />
@@ -207,6 +208,7 @@
   <ItemGroup>
     <ClCompile Include="ArrowFigure.cpp" />
     <ClCompile Include="Caret.cpp" />
+    <ClCompile Include="CFigureDialog.cpp" />
     <ClCompile Include="ChildFrm.cpp" />
     <ClCompile Include="Color.cpp" />
     <ClCompile Include="EllipseFigure.cpp" />

@@ -81,6 +81,9 @@
     <ClInclude Include="FigureFileManager.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="CFigureDialog.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="MFCDraw.cpp">
@@ -132,6 +135,9 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="FigureFileManager.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="CFigureDialog.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

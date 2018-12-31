@@ -28,7 +28,11 @@
 #include "TextFigure.h"
 
 #include "FigureFileManager.h"
+
+#include "CFigureDialog.h"
 //
+
+
 
 #include "MFCDrawDoc.h"
 
@@ -67,6 +71,7 @@ BEGIN_MESSAGE_MAP(CMFCDrawDoc, CDocument)
 	ON_UPDATE_COMMAND_UI(ID_EDIT_CUT, &CMFCDrawDoc::OnUpdateEditCut)
 	ON_UPDATE_COMMAND_UI(ID_EDIT_COPY, &CMFCDrawDoc::OnUpdateEditCopy)
 	ON_UPDATE_COMMAND_UI(ID_FORMAT_FILL, &CMFCDrawDoc::OnUpdateFormatFill)
+	ON_COMMAND(ID_VIEW_DEMODIALOG, &CMFCDrawDoc::OnViewDemodialog)
 END_MESSAGE_MAP()
 
 
@@ -97,7 +102,7 @@ CMFCDrawDoc::~CMFCDrawDoc()
 	AfxGetApp()->WriteProfileInt(TEXT("MFCDraw"), TEXT("CurrentColor"), (Utility::Color) m_nextColor);
 	AfxGetApp()->WriteProfileInt(TEXT("MFCDraw"), TEXT("CurrentFill"), (BOOL) m_bNextFill);
 
-	if (m_pDragRectangle) delete m_pDragRectangle;
+	
 	
 
 	
@@ -732,8 +737,7 @@ void CMFCDrawDoc::OnUpdateAddLine(CCmdUI *pCmdUI)
 {
 	pCmdUI->Enable(m_eApplicationState == IDLE);
 	pCmdUI->SetRadio(m_eNextActionState == ADD_LINE);
-	// also possible: 
-	//pCmdUI->SetCheck(m_eNextActionState == ADD_LINE);
+	
 }
 
 
@@ -904,6 +908,9 @@ void CMFCDrawDoc::DeleteContents()
 		
 	TRACE(_T("CDoc: DeleteContents \n"));
 
+
+	if (m_pDragRectangle) delete m_pDragRectangle;
+
 	while (!m_copyPtrList.IsEmpty())
 	{
 		m_pTemp = (Figure*)m_copyPtrList.RemoveHead();
@@ -916,7 +923,7 @@ void CMFCDrawDoc::DeleteContents()
 	
 
 	//als een object gemarkeerd is loopt het hier vast
-
+	//bij markeren wordt een kopie van het figuur gemaakt en blijft in de lijst staan
 
 
 	
@@ -932,6 +939,56 @@ void CMFCDrawDoc::DeleteContents()
 		}
 	}
 
+
+
+}
+
+
+void CMFCDrawDoc::OnViewDemodialog()
+{
+	// show the modal dialog 
+	CFigureDialog dlg;
+
+	// Schools of the Southeastern Conference
+	const TCHAR szSchools[][20] = 
+	{
+		_T("Alabama"),
+		_T("Arkansas"),
+		_T("Florida"),
+		_T("Georgia"),
+		_T("Kentucky"),
+		_T("Mississippi"),
+		_T("Mississippi State"),
+		_T("South Carolina"),
+		_T("Tennessee"),
+		_T("Vanderbilt"),
+	};
+
+	//CStringList list;
+	//for (int i = 0; i < 10; i++)
+	//	dlg.m_strList.AddTail(szSchools[i]);
+
+	int i = 0;
+	for (POSITION pos = m_figurePtrList.GetHeadPosition();
+		pos != NULL;
+		m_figurePtrList.GetNext(pos))
+	{
+		Figure* pFigure = m_figurePtrList.GetAt(pos);
+
+		CString strName;
+
+		strName.Format(L"Figure %d", i);
+
+		dlg.m_strList.AddTail(strName);
+		i++;
+		//pFigure->Dump(afxDump);
+
+	}
+
+	
+	
+
+	dlg.DoModal();
 
 
 }
