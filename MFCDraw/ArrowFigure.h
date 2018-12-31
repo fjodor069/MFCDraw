@@ -6,6 +6,7 @@
 // 
 class ArrowFigure : public virtual Figure, private LineFigure
 {
+	DECLARE_DYNAMIC(ArrowFigure)
 public:
 	ArrowFigure();
 	ArrowFigure(const Utility::Color& color, const CPoint& ptMouse);

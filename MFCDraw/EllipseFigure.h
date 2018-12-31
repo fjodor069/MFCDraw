@@ -1,6 +1,7 @@
 #pragma once
 class EllipseFigure : public virtual TwoDimensionalFigure, private RectangleFigure
 {
+	DECLARE_DYNAMIC(EllipseFigure)
 public:
 	EllipseFigure();
 	EllipseFigure(const Utility::Color& color, const CPoint& ptTopLeft, BOOL bFilled);

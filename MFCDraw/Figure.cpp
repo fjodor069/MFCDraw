@@ -12,6 +12,7 @@ using namespace Utility;
 
 #include "Figure.h"
 
+IMPLEMENT_DYNAMIC(Figure, CObject)
 
 // Figure
 
@@ -48,11 +49,12 @@ void Figure::Serialize(CArchive & archive)
 	m_figureColor.Serialize(archive);
 }
 
-
+#ifdef _DEBUG
 void Figure::Dump(CDumpContext& dc) const
 {
-	//CObject::Dump(dc);
+	CObject::Dump(dc);
 
 	
-	dc << _T("Figure ");
+	dc << _T("Figure ") << _T("\nmarked") << m_bMarked;
 }
+#endif

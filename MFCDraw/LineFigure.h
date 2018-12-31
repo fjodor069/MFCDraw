@@ -7,6 +7,7 @@
 
 class LineFigure : public virtual Figure
 {
+	DECLARE_DYNAMIC(LineFigure)
 public:
 	LineFigure();
 

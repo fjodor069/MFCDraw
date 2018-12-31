@@ -7,6 +7,7 @@
 
 #include "RectangleFigure.h"
 
+IMPLEMENT_DYNAMIC(RectangleFigure,TwoDimensionalFigure)
 
 RectangleFigure::RectangleFigure()
 	: TwoDimensionalFigure(),
@@ -311,10 +312,12 @@ CRect RectangleFigure::GetArea() const
 
 
 
-
+#ifdef _DEBUG
 void RectangleFigure::Dump(CDumpContext& dc) const
 {
-	//TwoDimensionalFigure::Dump(dc);
+	TwoDimensionalFigure::Dump(dc);
 
-	dc << _T("Rectangle ") << m_ptTopLeft << _T(" ") << m_ptBottomRight;
+	dc << _T("Rectangle ") << m_ptTopLeft.x << "," << m_ptTopLeft.y << _T(" ") << m_ptBottomRight.x << "," << m_ptBottomRight.y;
 }
+
+#endif

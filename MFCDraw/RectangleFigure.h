@@ -1,6 +1,7 @@
 #pragma once
 class RectangleFigure : public virtual TwoDimensionalFigure
 {
+	DECLARE_DYNAMIC(RectangleFigure)
 public:
 	RectangleFigure();
 

@@ -6,6 +6,7 @@
 
 class TwoDimensionalFigure : public Figure
 {
+	DECLARE_DYNAMIC(TwoDimensionalFigure)
 public:
 	TwoDimensionalFigure();
 
@@ -17,6 +18,7 @@ public:
 
 private:
 	BOOL m_bFilled;
-
+public:
+	virtual void Dump(CDumpContext& dc) const;
 };
 

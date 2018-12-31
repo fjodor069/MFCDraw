@@ -7,6 +7,8 @@
 #include "LineFigure.h"
 
 
+IMPLEMENT_DYNAMIC(LineFigure,Figure)
+
 LineFigure::LineFigure()
 	: Figure(Utility::Black, FALSE),
 	m_eDragMode(CREATE_LINE)
@@ -231,12 +233,14 @@ CRect LineFigure::GetArea() const
 }
 
 
-
+#ifdef _DEBUG
 
 void LineFigure::Dump(CDumpContext& dc) const
 {
 	//show diagnostic info for debugging
-	//Figure::Dump(dc);
+	Figure::Dump(dc);
 
-	dc << _T("Line ") << m_ptFirst << _T(" ") << m_ptLast;
+	dc << _T("Line ") << m_ptFirst.x << "," << m_ptFirst.y << _T(" ") << m_ptLast.x << "," << m_ptLast.y;
 }
+
+#endif

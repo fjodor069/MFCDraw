@@ -85,6 +85,8 @@ CMFCDrawDoc::CMFCDrawDoc()
 	m_pDragRectangle = NULL;
 	m_pSingleFigure = NULL;
 
+	TRACE("Document object constructed\n");
+
 }
 
 CMFCDrawDoc::~CMFCDrawDoc()
@@ -102,13 +104,14 @@ CMFCDrawDoc::~CMFCDrawDoc()
 	////clear all objects !! important !!
 	//see override in CDoc::DeleteContents
 
-	//while (!m_figurePtrList.IsEmpty())
-	//{
-	//	m_pSingleFigure = (Figure*) m_figurePtrList.RemoveHead();
-	//	delete m_pSingleFigure;
-	//}
-
 	
+
+	//dump the document on exit
+	TRACE("Document object destroyed\n");
+
+#ifdef _DEBUG
+	Dump(afxDump);
+#endif
 
 		
 
@@ -231,6 +234,11 @@ void CMFCDrawDoc::Dump(CDumpContext& dc) const
 {
 	CDocument::Dump(dc);
 	TRACE(_T("CDoc: Dumping document \n"));
+
+	dc.SetDepth(1);
+	dc << m_figurePtrList;
+
+
 }
 #endif //_DEBUG
 
@@ -834,7 +842,7 @@ void CMFCDrawDoc::ClearCopyList()
 
 	while (!m_copyPtrList.IsEmpty())
 	{
-		m_pTemp = (Figure*)m_figurePtrList.RemoveHead();
+		m_pTemp = (Figure*)m_copyPtrList.RemoveHead();
 		if (m_pTemp != NULL)
 			delete m_pTemp;
 	}
@@ -893,10 +901,22 @@ void CMFCDrawDoc::DeleteContents()
 
 	//clear all objects !! important !!
 	Figure* m_pTemp;
+		
+	TRACE(_T("CDoc: DeleteContents \n"));
+
+	while (!m_copyPtrList.IsEmpty())
+	{
+		m_pTemp = (Figure*)m_copyPtrList.RemoveHead();
+		if (m_pTemp != NULL)
+		{
+			TRACE(_T("CDoc: deleted a Copy \n"));
+			delete m_pTemp;
+		}
+	}
 	
-	
-	TRACE(_T("CDoc: application state %d \n"),m_eApplicationState);
-	TRACE(_T("CDoc: next action state %d \n"), m_eNextActionState);
+
+	//als een object gemarkeerd is loopt het hier vast
+
 
 
 	
@@ -904,10 +924,12 @@ void CMFCDrawDoc::DeleteContents()
 	{
 		
 		m_pTemp = (Figure*)m_figurePtrList.RemoveHead();
-
-		
+				
 		if (m_pTemp != NULL)
-		  delete m_pTemp;
+		{
+			TRACE(_T("CDoc: deleted a Figure \n"));
+			delete m_pTemp;
+		}
 	}
 
 

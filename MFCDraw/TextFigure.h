@@ -9,6 +9,7 @@ enum KeyboardState { KM_INSERT, KM_OVERWRITE };
 
 class TextFigure :	public Figure
 {
+	DECLARE_DYNAMIC(TextFigure)
 public:
 	TextFigure();
 	

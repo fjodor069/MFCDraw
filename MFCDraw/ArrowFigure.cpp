@@ -8,6 +8,7 @@
 
 #include "ArrowFigure.h"
 
+IMPLEMENT_DYNAMIC(ArrowFigure,Figure)
 
 ArrowFigure::ArrowFigure()
 	: Figure(),
@@ -119,13 +120,12 @@ void ArrowFigure::SetArrowPoints()
 
 
 
-
+#ifdef _DEBUG
 void ArrowFigure::Dump(CDumpContext& dc) const
 {
-	//__super::Dump(dc);
+	__super::Dump(dc);
 
-	// TODO: Add your specialized code here and/or call the base class
-	dc << _T("Arrow ") << m_ptFirst << _T(" ") << m_ptLast;;
-
+	dc << _T("Arrow ") << m_ptFirst.x << "," << m_ptFirst.y << _T(" ") << m_ptLast.x << "," << m_ptLast.y;
 
 }
+#endif

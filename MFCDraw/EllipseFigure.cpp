@@ -9,6 +9,7 @@
 
 #include "EllipseFigure.h"
 
+IMPLEMENT_DYNAMIC(EllipseFigure,TwoDimensionalFigure)
 
 EllipseFigure::EllipseFigure()
 	: TwoDimensionalFigure(),
@@ -260,11 +261,12 @@ void EllipseFigure::Draw(CDC * pDC) const
 
 
 
-
+#ifdef _DEBUG
 
 void EllipseFigure::Dump(CDumpContext& dc) const
 {
-	//__super::Dump(dc);
+	__super::Dump(dc);
 
 	dc << _T("Ellipse ");
 }
+#endif

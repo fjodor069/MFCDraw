@@ -8,6 +8,7 @@
 
 #include "TwoDimensionalFigure.h"
 
+IMPLEMENT_DYNAMIC(TwoDimensionalFigure,Figure)
 
 TwoDimensionalFigure::TwoDimensionalFigure() 
 	: m_bFilled(FALSE)
@@ -36,3 +37,13 @@ void TwoDimensionalFigure::Serialize(CArchive & archive)
 		archive >> m_bFilled;
 	}
 }
+
+
+#ifdef _DEBUG
+void TwoDimensionalFigure::Dump(CDumpContext & dc) const
+{
+	Figure::Dump(dc);
+
+	dc << _T("TwoDimensionalFigure ");
+}
+#endif

@@ -8,6 +8,7 @@
 //
 class Figure : public CObject
 {
+	DECLARE_DYNAMIC(Figure)
 public:
 	Figure();
 	

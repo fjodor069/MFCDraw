@@ -9,6 +9,7 @@
 
 #include "TextFigure.h"
 
+IMPLEMENT_DYNAMIC(TextFigure,Figure)
 
 TextFigure::TextFigure()
 	: Figure()
@@ -315,11 +316,13 @@ void TextFigure::GenerateCaretArray(CDC * pDC)
 }
 
 
-
+#ifdef _DEBUG
 
 void TextFigure::Dump(CDumpContext& dc) const
 {
-	//Figure::Dump(dc);
+	Figure::Dump(dc);
 
 	dc << _T("Text ")  << _T(" ") << m_ptText;
 }
+
+#endif
