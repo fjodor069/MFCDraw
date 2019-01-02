@@ -43,4 +43,10 @@ public:
 };
 
 
-typedef MyList<Figure*>  FigurePointerList;
+// typedef MyList<Figure*> FigurePointerList;
+// MyList template is cause of a major bug !!
+//
+// use a standard MCF collection class instead:
+// or even better use STL collection
+//
+typedef CTypedPtrList<CObList,Figure*>  FigurePointerList;

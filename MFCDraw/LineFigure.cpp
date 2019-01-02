@@ -180,9 +180,6 @@ void LineFigure::Draw(CDC * pDC) const
 	CPen pen(PS_SOLID, 0, (COLORREF)GetColor());
 	
 
-	/*TRACE(_T("First x = %d, y = %d\n", m_ptFirst.x, m_ptFirst.y));
-	TRACE(_T("Last x = %d, y = %d\n", m_ptLast.x, m_ptLast.y));*/
-
 	CPen* pOldPen = pDC->SelectObject(&pen);
 	pDC->MoveTo(m_ptFirst.x, m_ptFirst.y);
 	pDC->LineTo(m_ptLast.x, m_ptLast.y);

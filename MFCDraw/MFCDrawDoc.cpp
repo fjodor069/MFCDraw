@@ -90,7 +90,7 @@ CMFCDrawDoc::CMFCDrawDoc()
 	m_pDragRectangle = NULL;
 	m_pSingleFigure = NULL;
 
-	TRACE("Document object constructed\n");
+	TRACE(_T("Document object constructed\n"));
 
 }
 
@@ -101,9 +101,6 @@ CMFCDrawDoc::~CMFCDrawDoc()
 	// write color and fill
 	AfxGetApp()->WriteProfileInt(TEXT("MFCDraw"), TEXT("CurrentColor"), (Utility::Color) m_nextColor);
 	AfxGetApp()->WriteProfileInt(TEXT("MFCDraw"), TEXT("CurrentFill"), (BOOL) m_bNextFill);
-
-	
-	
 
 	
 	////clear all objects !! important !!
@@ -141,6 +138,7 @@ BOOL CMFCDrawDoc::OnNewDocument()
 // we cannot serialize the list itself because it contains pointers, not objects
 // the list is iterated and stored one by one
 // the figurefilemanager helps storing the class type of the object
+//
 void CMFCDrawDoc::Serialize(CArchive& ar)
 {
 	CDocument::Serialize(ar);
@@ -262,7 +260,7 @@ void CMFCDrawDoc::MouseDown(CPoint ptMouse, BOOL bControlKeyDown, CDC * pDC)
 	if (m_eApplicationState == EDIT_TEXT)
 		KeyDown(VK_RETURN, pDC);
 		
-	//depending on a menu choice.. one of these actions is taken
+	//depending on a menu command.. one of these actions is taken
 	switch (m_eNextActionState)
 	{
 		//if new figure is to be added...at the current mouse position.
@@ -271,7 +269,6 @@ void CMFCDrawDoc::MouseDown(CPoint ptMouse, BOOL bControlKeyDown, CDC * pDC)
 			m_figurePtrList.AddTail(m_pSingleFigure);
 			m_eApplicationState = SINGLE_DRAG;
 			SetModifiedFlag();
-			//afxDump << "Create line (" << ptMouse.x << " "<< ptMouse.y << ") \n";
 			
 			TRACE(_T("Line : x = %d y = %d \n"),ptMouse.x,ptMouse.y );
 			break;
@@ -281,7 +278,7 @@ void CMFCDrawDoc::MouseDown(CPoint ptMouse, BOOL bControlKeyDown, CDC * pDC)
 			m_figurePtrList.AddTail(m_pSingleFigure);
 			m_eApplicationState = SINGLE_DRAG;
 			SetModifiedFlag();
-			//afxDump << "Create arrow (" << ptMouse.x << " " << ptMouse.y << ") \n"; 
+			
 			TRACE(_T("Arrow : x = %d y = %d \n"), ptMouse.x, ptMouse.y);
 			
 			break;
@@ -291,10 +288,8 @@ void CMFCDrawDoc::MouseDown(CPoint ptMouse, BOOL bControlKeyDown, CDC * pDC)
 			m_figurePtrList.AddTail(m_pSingleFigure);
 			m_eApplicationState = SINGLE_DRAG;
 			SetModifiedFlag();
-			//afxDump << "Create rectangle (" << ptMouse.x << " " << ptMouse.y << ") \n"; 
 
 			TRACE(_T("Rectangle : x = %d y = %d \n"), ptMouse.x, ptMouse.y);
-			//m_pSingleFigure->Dump(afxDump);
 			break;
 
 		case ADD_ELLIPSE:
@@ -302,9 +297,8 @@ void CMFCDrawDoc::MouseDown(CPoint ptMouse, BOOL bControlKeyDown, CDC * pDC)
 			m_figurePtrList.AddTail(m_pSingleFigure);
 			m_eApplicationState = SINGLE_DRAG;
 			SetModifiedFlag();
-			//afxDump << "Create ellipse (" << ptMouse.x << " " << ptMouse.y << ") \n"; 
+			
 			TRACE(_T("Ellipse : x = %d y = %d \n"), ptMouse.x, ptMouse.y);
-			//m_pSingleFigure->Dump(afxDump);
 			break;
 
 		//keep adding text until return or escape is pressed
@@ -316,21 +310,27 @@ void CMFCDrawDoc::MouseDown(CPoint ptMouse, BOOL bControlKeyDown, CDC * pDC)
 			CRect rcCaret = m_pEditText->GetCaretArea(m_eKeyboardState);
 			m_caret.SetAndShowCaret(rcCaret);
 			SetModifiedFlag();
-			//afxDump << "Create text (" << ptMouse.x << " " << ptMouse.y << ") \n"; 
+			
 			TRACE(_T("Text : x = %d y = %d \n"), ptMouse.x, ptMouse.y);
-			//m_pSingleFigure->Dump(afxDump);
 		}
 		break;
 
 		case MODIFY_FIGURE:
-			
+			//
+			// in this block; there are 4 possible choices; A,B,C,D
+			//
 			afxDump << "CDoc: Modify Figure \n";
-
+			TRACE(" Before modify total number:  %d figures\n", m_figurePtrList.GetCount());
+			//control key not pressed; unmark all figures
+			//otherwise, with control pressed, add new mark to already marked figures
 			if (!bControlKeyDown)
 			{
 				UnmarkAllFigures();
 			}
+			//traverse the list backwards (topmost first) until a figure hit is found
+			// as defined by the click method of the figure
 			Figure* pClickedFigure = NULL;
+			POSITION pFound = NULL;
 			for (POSITION position = m_figurePtrList.GetTailPosition();
 				 position != NULL; m_figurePtrList.GetPrev(position))
 			{
@@ -338,49 +338,74 @@ void CMFCDrawDoc::MouseDown(CPoint ptMouse, BOOL bControlKeyDown, CDC * pDC)
 				if (pFigure->Click(ptMouse))
 				{
 					pClickedFigure = pFigure;
+					pFound = position;
+					afxDump << "figure is clicked - hit found\n";
 					break;
 				}
 			}
+			TRACE("After search total number:  %d figures\n", m_figurePtrList.GetCount());
+			//if a figure is found
 			if (pClickedFigure != NULL)
 			{
+				//get the old figure rectangle
 				CRect rcOldFigure = pClickedFigure->GetArea();
 				if (bControlKeyDown)
-
+				//control key is pressed
 				{
 					if (pClickedFigure->IsMarked())
 					{
+						//if already marked, unmark the figure
 						pClickedFigure->Mark(FALSE);
 						m_eApplicationState = IDLE;
+						afxDump << "CDoc: A: IDLE unmark figure \n";
+						TRACE(" total number:  %d figures\n", m_figurePtrList.GetCount());
 					}
 					else
 					{
+						//mark the figure and move it to the end (on top)
 						pClickedFigure->Mark(TRUE);
-						m_figurePtrList.Remove(pClickedFigure);
-						m_figurePtrList.AddTail(pClickedFigure);
+						//note: move to end is skipped ; contains bug
+						//m_figurePtrList.Remove(pClickedFigure);
+						//m_figurePtrList.RemoveAt(pFound);
+						//m_figurePtrList.AddTail(pClickedFigure);
 						m_eApplicationState = MULTIPLE_DRAG;
 						SetModifiedFlag();
+						afxDump << "CDoc: B: MULTIPLE_DRAG mark several figures \n";
 					}
 				}
+				//control key is not pressed
 				else
 				{
+					//mark the figure
+					//set the single figure pointer
+					//move it to the end of the list (on top)
+				
+					pClickedFigure->Mark(TRUE);
+					//m_figurePtrList.Remove(pClickedFigure);
+					//m_figurePtrList.RemoveAt(pFound);
+					//m_figurePtrList.AddTail(pClickedFigure);
+
 					m_pSingleFigure = pClickedFigure;
-					m_pSingleFigure->Mark(TRUE);
-					m_figurePtrList.Remove(m_pSingleFigure);
-					m_figurePtrList.AddTail(m_pSingleFigure);
 					CRect rcFigure = m_pSingleFigure->GetArea();
 					UpdateAllViews(NULL, (LPARAM)&rcFigure);
 					m_eApplicationState = SINGLE_DRAG;
 					SetModifiedFlag();
+					afxDump << "CDoc: C: SINGLE_DRAG mark a single figure \n";
+					TRACE(" total number:  %d figures\n", m_figurePtrList.GetCount());
 				}
+				//get the new figure rectangle
 				CRect rcNewFigure = pClickedFigure->GetArea();
+				//update the views
 				UpdateAllViews(NULL, (LPARAM)&rcOldFigure);
 				UpdateAllViews(NULL, (LPARAM)&rcNewFigure);
 			}
 			else
+				//no figure found; create and initialise the drag (inside) rectangle
+				//(wich is destroyed in mouseup event)
 			{
-				afxDump << "CDoc: creating a drag rectangle \n";
 				check_memory(m_pDragRectangle = new RectangleFigure(Utility::Gray, ptMouse, FALSE));
 				m_eApplicationState = RECTANGLE_DRAG;
+				afxDump << "CDoc: D: RECTANGLE_DRAG create drag rectangle \n";
 			}
 			break;
 
@@ -404,6 +429,7 @@ void CMFCDrawDoc::MouseDrag(const CPoint & ptMouse)
 	{
 		case SINGLE_DRAG:
 		{
+			//one figure marked, move or modify it
 			CRect rcOldFigure = m_pSingleFigure->GetArea();
 			m_pSingleFigure->MoveOrModify(szDistance);
 			CRect rcNewFigure = m_pSingleFigure->GetArea();
@@ -414,6 +440,7 @@ void CMFCDrawDoc::MouseDrag(const CPoint & ptMouse)
 
 		case MULTIPLE_DRAG:
 		{
+			//more than one figure is marked and is moved
 			for (POSITION position = m_figurePtrList.GetHeadPosition(); position != NULL;
 				m_figurePtrList.GetNext(position))
 			{
@@ -432,6 +459,7 @@ void CMFCDrawDoc::MouseDrag(const CPoint & ptMouse)
 
 		case RECTANGLE_DRAG:
 		{
+			//update the drag rectangle
 			CRect rcOldInside = m_pDragRectangle->GetArea();
 			m_pDragRectangle->MoveOrModify(szDistance);
 			CRect rcNewInside = m_pDragRectangle->GetArea();
@@ -455,26 +483,32 @@ void CMFCDrawDoc::MouseDrag(const CPoint & ptMouse)
 // only do something if in the rectangle drag state
 void CMFCDrawDoc::MouseUp()
 {
-	POSITION position;
 	CRect rcArea;
 
 	switch (m_eApplicationState)
 	{
 		case RECTANGLE_DRAG:
 			rcArea = m_pDragRectangle->GetArea();
+			//normalise the rectangle
 			rcArea.NormalizeRect();
-			position = m_figurePtrList.GetTailPosition();
-
-			while (position != NULL)
+			TRACE(_T("Drag Rectangle end : \n"));
+			
+			// find all figures inside the drag rectangle
+			//traverse the list and mark them and move them to the end of the list
+			for (POSITION pos = m_figurePtrList.GetTailPosition();
+				pos != NULL;
+				m_figurePtrList.GetPrev(pos))
 			{
-				Figure* pFigure = m_figurePtrList.GetPrev(position);
-				if (pFigure->Inside(rcArea))
-				{
-					pFigure->Mark(TRUE);
-					m_figurePtrList.Remove(pFigure);
-					m_figurePtrList.AddTail(pFigure);
-				}
+				Figure* pFigure = m_figurePtrList.GetAt(pos);
+				pFigure->Mark(TRUE);
+				//m_figurePtrList.Remove(pFigure);
+				//m_figurePtrList.RemoveAt(pos);
+
+
+				//m_figurePtrList.AddTail(pFigure);
+				TRACE(_T("Drag Rectangle traversing the list : \n"));
 			}
+
 			delete m_pDragRectangle;
 			m_pDragRectangle = NULL;
 			UpdateAllViews(NULL, (LPARAM)&rcArea);
@@ -506,8 +540,8 @@ void CMFCDrawDoc::DoubleClick(CPoint ptMouse)
 		m_eApplicationState = IDLE;
 		CRect rcOldArea;
 		Figure* pClickedFigure = NULL;
-		for (POSITION position = m_figurePtrList.
-			GetTailPosition(); position != NULL;
+		for (POSITION position = m_figurePtrList.GetTailPosition(); 
+			position != NULL;
 			m_figurePtrList.GetPrev(position))
 		{
 			Figure* pFigure = m_figurePtrList.GetAt(position);
@@ -521,8 +555,9 @@ void CMFCDrawDoc::DoubleClick(CPoint ptMouse)
 
 		if (pClickedFigure != NULL)
 		{
-			m_figurePtrList.Remove(pClickedFigure);
-			m_figurePtrList.AddTail(pClickedFigure);
+			//m_figurePtrList.Remove(pClickedFigure);
+
+			//m_figurePtrList.AddTail(pClickedFigure);
 			m_pEditText = dynamic_cast<TextFigure*>	(pClickedFigure);
 			if (m_pEditText != NULL)
 			{
@@ -547,7 +582,7 @@ void CMFCDrawDoc::DoubleClick(CPoint ptMouse)
 BOOL CMFCDrawDoc::KeyDown(UINT cChar, CDC* pDC)
 {
 	// ...
-	int iMarked = m_figurePtrList.CountIf(IsMarked);
+	int iMarked = 0;// m_figurePtrList.CountIf(IsMarked);
 	if ((cChar == VK_DELETE) && (iMarked > 0))
 	{
 		OnEditDelete();
@@ -821,6 +856,7 @@ void CMFCDrawDoc::UnmarkAllFigures()
 	//traverse the figure list and unmark each figure
 	afxDump << "CDoc: UnmarkAllFigures \n";
 
+	int i = 0;
 	for (POSITION position = m_figurePtrList.GetHeadPosition();
 		position != NULL; m_figurePtrList.GetNext(position))
 	{
@@ -831,10 +867,12 @@ void CMFCDrawDoc::UnmarkAllFigures()
 
 		pFigure->Mark(FALSE);
 		
-		TRACE("Unmarking Figure: \n");
-
+		TRACE("Unmarking Figure: %d \n",i);
+		i++;
 	}
-
+	TRACE("Unmarked : total of %d figures\n", i );
+	TRACE("Unmarked : total number:  %d figures\n", m_figurePtrList.GetCount());
+	//afxDump << "CDoc: Unmarked " << i << " figures \n";
 }
 
 
@@ -868,7 +906,7 @@ void CMFCDrawDoc::OnUpdateEditPaste(CCmdUI *pCmdUI)
 
 void CMFCDrawDoc::OnUpdateEditCut(CCmdUI *pCmdUI)
 {
-	int iMarked = m_figurePtrList.CountIf(IsMarked);
+	int iMarked = 0;// m_figurePtrList.CountIf(IsMarked);
 	pCmdUI->Enable((m_eApplicationState == IDLE) && (iMarked > 0));
 
 
@@ -877,7 +915,7 @@ void CMFCDrawDoc::OnUpdateEditCut(CCmdUI *pCmdUI)
 
 void CMFCDrawDoc::OnUpdateEditCopy(CCmdUI *pCmdUI)
 {
-	int iMarked = m_figurePtrList.CountIf(IsMarked);
+	int iMarked = 0; // m_figurePtrList.CountIf(IsMarked);
 	pCmdUI->Enable((m_eApplicationState == IDLE) &&	(iMarked > 0));
 
 }
@@ -889,8 +927,8 @@ void CMFCDrawDoc::OnUpdateFormatFill(CCmdUI *pCmdUI)
 	{
 		// ...
 	case MODIFY_FIGURE:
-		int iFilled = m_figurePtrList.CountIf(IsMarkedAndFilled);
-		int iNotFilled = m_figurePtrList.CountIf(IsMarkedAndNotFilled);
+		int iFilled = 0;// m_figurePtrList.CountIf(IsMarkedAndFilled);
+		int iNotFilled = 0;// m_figurePtrList.CountIf(IsMarkedAndNotFilled);
 		BOOL bAtLeastOne = ((iFilled > 0) || (iNotFilled > 0));
 		pCmdUI->Enable(bAtLeastOne);
 		pCmdUI->SetCheck(bAtLeastOne && (iFilled >= iNotFilled));
@@ -922,11 +960,10 @@ void CMFCDrawDoc::DeleteContents()
 	}
 	
 
-	//als een object gemarkeerd is loopt het hier vast
-	//bij markeren wordt een kopie van het figuur gemaakt en blijft in de lijst staan
-
-
-	
+	//clean up all figures
+	//MFC style collection
+	//resolved bug
+		
 	while (!m_figurePtrList.IsEmpty() )
 	{
 		
@@ -948,26 +985,10 @@ void CMFCDrawDoc::OnViewDemodialog()
 {
 	// show the modal dialog 
 	CFigureDialog dlg;
-
-	// Schools of the Southeastern Conference
-	const TCHAR szSchools[][20] = 
-	{
-		_T("Alabama"),
-		_T("Arkansas"),
-		_T("Florida"),
-		_T("Georgia"),
-		_T("Kentucky"),
-		_T("Mississippi"),
-		_T("Mississippi State"),
-		_T("South Carolina"),
-		_T("Tennessee"),
-		_T("Vanderbilt"),
-	};
-
-	//CStringList list;
-	//for (int i = 0; i < 10; i++)
-	//	dlg.m_strList.AddTail(szSchools[i]);
-
+		
+	//add a list of all current figure objects as CString
+	//to the CStringlist in the dialog 
+	//wich puts it in its listbox control
 	int i = 0;
 	for (POSITION pos = m_figurePtrList.GetHeadPosition();
 		pos != NULL;
@@ -981,12 +1002,12 @@ void CMFCDrawDoc::OnViewDemodialog()
 
 		dlg.m_strList.AddTail(strName);
 		i++;
-		//pFigure->Dump(afxDump);
+		
 
 	}
 
 	
-	
+	//show the dialog
 
 	dlg.DoModal();
 

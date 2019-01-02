@@ -92,7 +92,9 @@ void CMFCDrawView::OnDraw(CDC* pDC)
 
 	const FigurePointerList* pFigurePtrList = pDoc->GetFigurePtrList();
 
-	//iterate through the list of objects ... and draw them
+	//iterate through the list of objects ... 
+	// first to last (bottom to top)
+	// and draw all of them
 	//
 	for (POSITION position = pFigurePtrList->GetHeadPosition();
 		position != NULL; pFigurePtrList->GetNext(position))
@@ -103,12 +105,11 @@ void CMFCDrawView::OnDraw(CDC* pDC)
 			pFigure->Draw(pDC);
 	}
 
-	
+	//if there is a drag rectangle; draw it
 	const RectangleFigure* pInsideRectangle = pDoc->GetInsideRectangle();
 	if (pInsideRectangle != NULL)
 	{
-		//TRACE(_T("DrawView: dumping the inside rectangle \n"));
-		
+				
 		pInsideRectangle->Draw(pDC);
 	}
 
